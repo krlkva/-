@@ -1,68 +1,100 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Магазин</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Minimal Shop — Лабораторная</title>
+
+  <!-- Google Font: Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
-  <header class="header">
-    <h1>Minimal Shop</h1>
-    <button id="open-cart" class="btn">Корзина</button>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="brand" href="#">luxf</a>
+      <nav class="top-nav" aria-label="Главное меню">
+        <a href="#">Chairs</a>
+        <a href="#">Armchairs</a>
+        <a href="#">Sofas</a>
+        <a href="#">Contact</a>
+      </nav>
+      <div class="header-actions">
+        <button id="cart-toggle" class="icon-btn" aria-expanded="false" aria-controls="cart">Корзина (<span id="cart-count">0</span>)</button>
+      </div>
+    </div>
   </header>
 
-  <main>
-    <section class="products">
-      <div class="product" data-id="1" data-price="500">
-        <img src="https://via.placeholder.com/200x150" alt="Товар 1">
-        <h3>Товар 1</h3>
-        <p>Цена: 500 ₽</p>
-        <button class="add-to-cart">Добавить в корзину</button>
+  <main class="wrap main-grid">
+    <section class="catalog" aria-labelledby="page-title">
+      <h1 id="page-title" class="page-title">Chairs</h1>
+
+      <div class="filters-row" role="region" aria-label="Фильтры">
+        <button class="pill">Type ▾</button>
+        <button class="pill">Material ▾</button>
+        <button class="pill">Color ▾</button>
+        <button class="pill">Price ▾</button>
+        <button class="pill">Sort ▾</button>
       </div>
 
-      <div class="product" data-id="2" data-price="750">
-        <img src="https://via.placeholder.com/200x150" alt="Товар 2">
-        <h3>Товар 2</h3>
-        <p>Цена: 750 ₽</p>
-        <button class="add-to-cart">Добавить в корзину</button>
+      <div id="products" class="products-grid" role="list">
+        <!-- продукты рендерятся скриптом -->
       </div>
 
-      <div class="product" data-id="3" data-price="1200">
-        <img src="https://via.placeholder.com/200x150" alt="Товар 3">
-        <h3>Товар 3</h3>
-        <p>Цена: 1200 ₽</p>
-        <button class="add-to-cart">Добавить в корзину</button>
+      <div class="pagination">
+        <button class="ghost" id="prev-page">←</button>
+        <div class="pages">1 • 2 • 3 • 4</div>
+        <button class="ghost" id="next-page">→</button>
       </div>
     </section>
+
+    <aside id="cart" class="cart" aria-labelledby="cart-title" aria-hidden="true">
+      <h2 id="cart-title">Корзина</h2>
+      <div id="cart-items" class="cart-items" aria-live="polite">
+        <!-- элементы корзины -->
+      </div>
+
+      <div class="cart-footer">
+        <div class="cart-sum">Итого: <strong id="cart-total">0 ₽</strong></div>
+        <button id="checkout-btn" class="btn primary" disabled>Оформить заказ</button>
+      </div>
+    </aside>
   </main>
 
-  <!-- Модальное окно корзины -->
-  <div class="modal" id="cart-modal">
-    <div class="modal-content">
-      <span id="close-cart" class="close">&times;</span>
-      <h2>Корзина</h2>
-      <div id="cart-items"></div>
-      <p>Итого: <span id="cart-total">0</span> ₽</p>
-      <button id="checkout" class="btn">Оформить заказ</button>
-    </div>
-  </div>
+  <!-- Modal заказа -->
+  <div id="modal" class="modal" aria-hidden="true">
+    <div class="modal-backdrop" id="modal-backdrop"></div>
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <h3 id="modal-title">Оформление заказа</h3>
+      <form id="order-form" class="order-form">
+        <label>
+          <span>Имя</span>
+          <input name="firstName" type="text" required />
+        </label>
+        <label>
+          <span>Фамилия</span>
+          <input name="lastName" type="text" required />
+        </label>
+        <label>
+          <span>Адрес доставки</span>
+          <input name="address" type="text" required />
+        </label>
+        <label>
+          <span>Телефон</span>
+          <input name="phone" type="tel" pattern="[\d\+\-\s\(\)]+" required />
+        </label>
 
-  <!-- Модальное окно оформления заказа -->
-  <div class="modal" id="order-modal">
-    <div class="modal-content">
-      <span id="close-order" class="close">&times;</span>
-      <h2>Оформление заказа</h2>
-      <form id="order-form">
-        <input type="text" placeholder="Имя" required>
-        <input type="text" placeholder="Фамилия" required>
-        <input type="text" placeholder="Адрес доставки" required>
-        <input type="tel" placeholder="Телефон" required>
-        <button type="submit" class="btn">Создать заказ</button>
+        <div class="modal-actions">
+          <button type="button" id="modal-close" class="btn">Закрыть</button>
+          <button type="submit" class="btn primary">Создать заказ</button>
+        </div>
+
+        <p id="order-msg" class="order-msg" aria-live="polite"></p>
       </form>
     </div>
   </div>
 
-  <script src="script.js"></script>
+  <script src="js/app.js" defer></script>
 </body>
 </html>
