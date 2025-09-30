@@ -1,100 +1,63 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Minimal Shop — Лабораторная</title>
-
-  <!-- Google Font: Inter -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-
-  <link rel="stylesheet" href="css/styles.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Магазин товаров</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header class="site-header">
-    <div class="wrap">
-      <a class="brand" href="#">luxf</a>
-      <nav class="top-nav" aria-label="Главное меню">
-        <a href="#">Chairs</a>
-        <a href="#">Armchairs</a>
-        <a href="#">Sofas</a>
-        <a href="#">Contact</a>
-      </nav>
-      <div class="header-actions">
-        <button id="cart-toggle" class="icon-btn" aria-expanded="false" aria-controls="cart">Корзина (<span id="cart-count">0</span>)</button>
-      </div>
-    </div>
-  </header>
+    <header>
+        <nav>
+            <div class="logo">Магазин</div>
+            <ul class="nav-links">
+                <li><a href="#">Главная</a></li>
+                <li><a href="#">Каталог</a></li>
+                <li><a href="#">О нас</a></li>
+                <li class="cart-icon">
+                    <a href="#">Корзина (<span id="cart-count">0</span>)</a>
+                </li>
+            </ul>
+        </nav>
+    </header>
 
-  <main class="wrap main-grid">
-    <section class="catalog" aria-labelledby="page-title">
-      <h1 id="page-title" class="page-title">Chairs</h1>
+    <main>
+        <section class="products">
+            <h1>Наши товары</h1>
+            <div class="products-grid" id="products-container">
+                <!-- Товары будут добавляться через JavaScript -->
+            </div>
+        </section>
+    </main>
 
-      <div class="filters-row" role="region" aria-label="Фильтры">
-        <button class="pill">Type ▾</button>
-        <button class="pill">Material ▾</button>
-        <button class="pill">Color ▾</button>
-        <button class="pill">Price ▾</button>
-        <button class="pill">Sort ▾</button>
-      </div>
-
-      <div id="products" class="products-grid" role="list">
-        <!-- продукты рендерятся скриптом -->
-      </div>
-
-      <div class="pagination">
-        <button class="ghost" id="prev-page">←</button>
-        <div class="pages">1 • 2 • 3 • 4</div>
-        <button class="ghost" id="next-page">→</button>
-      </div>
-    </section>
-
-    <aside id="cart" class="cart" aria-labelledby="cart-title" aria-hidden="true">
-      <h2 id="cart-title">Корзина</h2>
-      <div id="cart-items" class="cart-items" aria-live="polite">
-        <!-- элементы корзины -->
-      </div>
-
-      <div class="cart-footer">
-        <div class="cart-sum">Итого: <strong id="cart-total">0 ₽</strong></div>
-        <button id="checkout-btn" class="btn primary" disabled>Оформить заказ</button>
-      </div>
-    </aside>
-  </main>
-
-  <!-- Modal заказа -->
-  <div id="modal" class="modal" aria-hidden="true">
-    <div class="modal-backdrop" id="modal-backdrop"></div>
-    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-      <h3 id="modal-title">Оформление заказа</h3>
-      <form id="order-form" class="order-form">
-        <label>
-          <span>Имя</span>
-          <input name="firstName" type="text" required />
-        </label>
-        <label>
-          <span>Фамилия</span>
-          <input name="lastName" type="text" required />
-        </label>
-        <label>
-          <span>Адрес доставки</span>
-          <input name="address" type="text" required />
-        </label>
-        <label>
-          <span>Телефон</span>
-          <input name="phone" type="tel" pattern="[\d\+\-\s\(\)]+" required />
-        </label>
-
-        <div class="modal-actions">
-          <button type="button" id="modal-close" class="btn">Закрыть</button>
-          <button type="submit" class="btn primary">Создать заказ</button>
+    <!-- Модальное окно корзины -->
+    <div id="cart-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Ваша корзина</h2>
+            <div id="cart-items"></div>
+            <div class="cart-total">
+                <p>Итого: <span id="total-price">0</span> руб.</p>
+                <button id="checkout-btn">Оформить заказ</button>
+            </div>
         </div>
-
-        <p id="order-msg" class="order-msg" aria-live="polite"></p>
-      </form>
     </div>
-  </div>
 
-  <script src="js/app.js" defer></script>
+    <!-- Форма оформления заказа -->
+    <div id="order-form-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Оформление заказа</h2>
+            <form id="order-form">
+                <input type="text" placeholder="Имя" required>
+                <input type="text" placeholder="Фамилия" required>
+                <input type="text" placeholder="Адрес доставки" required>
+                <input type="tel" placeholder="Номер телефона" required>
+                <button type="submit">Создать заказ</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>
