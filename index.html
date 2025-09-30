@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Магазин</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="header">
+    <h1>Minimal Shop</h1>
+    <button id="open-cart" class="btn">Корзина</button>
+  </header>
+
+  <main>
+    <section class="products">
+      <div class="product" data-id="1" data-price="500">
+        <img src="https://via.placeholder.com/200x150" alt="Товар 1">
+        <h3>Товар 1</h3>
+        <p>Цена: 500 ₽</p>
+        <button class="add-to-cart">Добавить в корзину</button>
+      </div>
+
+      <div class="product" data-id="2" data-price="750">
+        <img src="https://via.placeholder.com/200x150" alt="Товар 2">
+        <h3>Товар 2</h3>
+        <p>Цена: 750 ₽</p>
+        <button class="add-to-cart">Добавить в корзину</button>
+      </div>
+
+      <div class="product" data-id="3" data-price="1200">
+        <img src="https://via.placeholder.com/200x150" alt="Товар 3">
+        <h3>Товар 3</h3>
+        <p>Цена: 1200 ₽</p>
+        <button class="add-to-cart">Добавить в корзину</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Модальное окно корзины -->
+  <div class="modal" id="cart-modal">
+    <div class="modal-content">
+      <span id="close-cart" class="close">&times;</span>
+      <h2>Корзина</h2>
+      <div id="cart-items"></div>
+      <p>Итого: <span id="cart-total">0</span> ₽</p>
+      <button id="checkout" class="btn">Оформить заказ</button>
+    </div>
+  </div>
+
+  <!-- Модальное окно оформления заказа -->
+  <div class="modal" id="order-modal">
+    <div class="modal-content">
+      <span id="close-order" class="close">&times;</span>
+      <h2>Оформление заказа</h2>
+      <form id="order-form">
+        <input type="text" placeholder="Имя" required>
+        <input type="text" placeholder="Фамилия" required>
+        <input type="text" placeholder="Адрес доставки" required>
+        <input type="tel" placeholder="Телефон" required>
+        <button type="submit" class="btn">Создать заказ</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
