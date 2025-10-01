@@ -1,59 +1,59 @@
-// Данные товаров
+// Данные товаров с вашими изображениями
 const products = [
     {
         id: 1,
         name: "Смартфон Samsung Galaxy S21",
         price: 59990,
-        image: "images/7384989961.jpg",
+        image: "images/smartphone.jpg",
         description: "Флагманский смартфон с отличной камерой и производительностью. 128 ГБ памяти."
     },
     {
         id: 2,
         name: "Ноутбук Apple MacBook Air",
         price: 99990,
-        image: "MacBook Air",
+        image: "images/laptop.jpg",
         description: "Легкий и мощный ноутбук для работы и творчества. Чип M1, 13 дюймов."
     },
     {
         id: 3,
         name: "Наушники Sony WH-1000XM4",
         price: 24990,
-        image: "Sony WH-1000XM4",
+        image: "images/headphones.jpg",
         description: "Беспроводные наушники с продвинутым шумоподавлением."
     },
     {
         id: 4,
         name: "Фотоаппарат Canon EOS R6",
         price: 159990,
-        image: "Canon EOS R6",
+        image: "images/camera.jpg",
         description: "Профессиональная беззеркальная камера для съемки в любых условиях."
     },
     {
         id: 5,
         name: "Умные часы Apple Watch Series 7",
         price: 32990,
-        image: "Apple Watch 7",
+        image: "images/smartwatch.jpg",
         description: "Современные умные часы с множеством функций для здоровья и fitness."
     },
     {
         id: 6,
         name: "Планшет iPad Pro 11",
         price: 74990,
-        image: "iPad Pro",
+        image: "images/tablet.jpg",
         description: "Мощный планшет для работы и развлечений. 128 ГБ памяти."
     },
     {
         id: 7,
         name: "Игровая консоль PlayStation 5",
         price: 49990,
-        image: "PlayStation 5",
+        image: "images/console.jpg",
         description: "Новейшая игровая консоль от Sony с 4K графикой."
     },
     {
         id: 8,
         name: "Телевизор LG OLED55C1",
         price: 89990,
-        image: "LG OLED TV",
+        image: "images/tv.jpg",
         description: "4K OLED телевизор с потрясающим качеством изображения. 55 дюймов."
     }
 ];
@@ -62,16 +62,15 @@ const products = [
 const cart = {
     items: [],
     
-    // Инициализация корзины из localStorage
     init() {
         const savedCart = localStorage.getItem('cart');
         if (savedCart) {
             this.items = JSON.parse(savedCart);
         }
         this.updateCartDisplay();
+        this.updateProductCards(); // Обновляем карточки товаров
     },
     
-    // Добавление товара в корзину
     add(productId) {
         const product = products.find(p => p.id === productId);
         if (!product) return;
@@ -92,18 +91,18 @@ const cart = {
         
         this.save();
         this.updateCartDisplay();
+        this.updateProductCards(); // Обновляем карточки после добавления
         showNotification('Товар добавлен в корзину!');
     },
     
-    // Удаление товара из корзины
     remove(productId) {
         this.items = this.items.filter(item => item.id !== productId);
         this.save();
         this.updateCartDisplay();
+        this.updateProductCards(); // Обновляем карточки после удаления
         showNotification('Товар удален из корзины');
     },
     
-    // Изменение количества товара
     updateQuantity(productId, newQuantity) {
         if (newQuantity < 1) {
             this.remove(productId);
@@ -115,32 +114,33 @@ const cart = {
             item.quantity = newQuantity;
             this.save();
             this.updateCartDisplay();
+            this.updateProductCards(); // Обновляем карточки после изменения количества
         }
     },
     
-    // Получение общей стоимости
     getTotalPrice() {
         return this.items.reduce((total, item) => total + (item.price * item.quantity), 0);
     },
     
-    // Получение общего количества товаров
     getTotalCount() {
         return this.items.reduce((total, item) => total + item.quantity, 0);
     },
     
-    // Сохранение корзины в localStorage
+    getItemQuantity(productId) {
+        const item = this.items.find(item => item.id === productId);
+        return item ? item.quantity : 0;
+    },
+    
     save() {
         localStorage.setItem('cart', JSON.stringify(this.items));
     },
     
-    // Обновление отображения корзины
     updateCartDisplay() {
         const cartCount = document.getElementById('cart-count');
         cartCount.textContent = this.getTotalCount();
         this.displayCartItems();
     },
     
-    // Отображение товаров в корзине
     displayCartItems() {
         const cartItems = document.getElementById('cart-items');
         const totalPrice = document.getElementById('total-price');
@@ -160,7 +160,7 @@ const cart = {
             cartItem.innerHTML = `
                 <div class="cart-item-info">
                     <div class="cart-item-title">${item.name}</div>
-                    <div class="cart-item-price">${item.price.toLocaleString()} руб. × ${item.quantity}</div>
+                    <div class="cart-item-price">${item.price.toLocaleString()} руб. × ${item.quantity} = ${(item.price * item.quantity).toLocaleString()} руб.</div>
                 </div>
                 <div class="cart-item-controls">
                     <button class="quantity-btn decrease" data-id="${item.id}">-</button>
@@ -177,7 +177,22 @@ const cart = {
         this.addCartEventListeners();
     },
     
-    // Добавление обработчиков событий для элементов корзины
+    // Обновление карточек товаров в каталоге
+    updateProductCards() {
+        document.querySelectorAll('.product-card').forEach(card => {
+            const productId = parseInt(card.querySelector('.add-to-cart').getAttribute('data-id'));
+            const quantity = this.getItemQuantity(productId);
+            const quantityControls = card.querySelector('.quantity-controls');
+            
+            if (quantity > 0) {
+                quantityControls.style.display = 'flex';
+                quantityControls.querySelector('.quantity').textContent = quantity;
+            } else {
+                quantityControls.style.display = 'none';
+            }
+        });
+    },
+    
     addCartEventListeners() {
         document.querySelectorAll('.increase').forEach(button => {
             button.addEventListener('click', function() {
@@ -216,16 +231,23 @@ function displayProducts() {
     products.forEach(product => {
         const productCard = document.createElement('div');
         productCard.className = 'product-card';
+        const quantity = cart.getItemQuantity(product.id);
         
         productCard.innerHTML = `
-            <div class="product-image">
-                ${product.image}
-            </div>
+            <img src="${product.image}" alt="${product.name}" class="product-image" 
+                 onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjNjY3ZWVhIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxOCIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4='">
             <div class="product-info">
                 <h3 class="product-title">${product.name}</h3>
                 <p class="product-description">${product.description}</p>
                 <p class="product-price">${product.price.toLocaleString()} руб.</p>
-                <button class="btn btn-primary add-to-cart" data-id="${product.id}">
+                
+                <div class="quantity-controls" style="display: ${quantity > 0 ? 'flex' : 'none'}">
+                    <button class="quantity-btn decrease" data-id="${product.id}">-</button>
+                    <span class="quantity">${quantity}</span>
+                    <button class="quantity-btn increase" data-id="${product.id}">+</button>
+                </div>
+                
+                <button class="btn btn-primary add-to-cart" data-id="${product.id}" style="display: ${quantity > 0 ? 'none' : 'block'}">
                     Добавить в корзину
                 </button>
             </div>
@@ -234,11 +256,32 @@ function displayProducts() {
         productsGrid.appendChild(productCard);
     });
     
-    // Добавляем обработчики событий для кнопок "Добавить в корзину"
+    // Обработчики для кнопок "Добавить в корзину"
     document.querySelectorAll('.add-to-cart').forEach(button => {
         button.addEventListener('click', function() {
             const productId = parseInt(this.getAttribute('data-id'));
             cart.add(productId);
+        });
+    });
+    
+    // Обработчики для кнопок управления количеством в карточках
+    document.querySelectorAll('.product-card .increase').forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = parseInt(this.getAttribute('data-id'));
+            const item = cart.items.find(item => item.id === productId);
+            if (item) {
+                cart.updateQuantity(productId, item.quantity + 1);
+            }
+        });
+    });
+    
+    document.querySelectorAll('.product-card .decrease').forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = parseInt(this.getAttribute('data-id'));
+            const item = cart.items.find(item => item.id === productId);
+            if (item) {
+                cart.updateQuantity(productId, item.quantity - 1);
+            }
         });
     });
 }
@@ -258,33 +301,27 @@ function showNotification(message) {
 
 // Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', function() {
-    // Инициализируем корзину и товары
     cart.init();
     displayProducts();
     
-    // Получаем элементы модальных окон
     const cartModal = document.getElementById('cart-modal');
     const orderModal = document.getElementById('order-modal');
     const successModal = document.getElementById('success-modal');
     
-    // Получаем кнопки открытия/закрытия модальных окон
     const cartIcon = document.getElementById('cart-icon');
     const closeCart = document.getElementById('close-cart');
     const checkoutBtn = document.getElementById('checkout-btn');
     const closeOrder = document.getElementById('close-order');
     const closeSuccess = document.getElementById('close-success');
     
-    // Открытие корзины
     cartIcon.addEventListener('click', function() {
         cartModal.style.display = 'block';
     });
     
-    // Закрытие корзины
     closeCart.addEventListener('click', function() {
         cartModal.style.display = 'none';
     });
     
-    // Открытие формы заказа
     checkoutBtn.addEventListener('click', function() {
         if (cart.items.length === 0) {
             showNotification('Корзина пуста! Добавьте товары перед оформлением заказа.');
@@ -294,17 +331,14 @@ document.addEventListener('DOMContentLoaded', function() {
         orderModal.style.display = 'block';
     });
     
-    // Закрытие формы заказа
     closeOrder.addEventListener('click', function() {
         orderModal.style.display = 'none';
     });
     
-    // Обработка отправки формы заказа
     const orderForm = document.getElementById('order-form');
     orderForm.addEventListener('submit', function(e) {
         e.preventDefault();
         
-        // Получаем данные формы
         const formData = new FormData(this);
         const order = {
             firstName: formData.get('first-name'),
@@ -316,30 +350,23 @@ document.addEventListener('DOMContentLoaded', function() {
             date: new Date().toLocaleString()
         };
         
-        // В реальном приложении здесь была бы отправка данных на сервер
         console.log('Заказ создан:', order);
         
-        // Закрываем форму заказа
         orderModal.style.display = 'none';
-        
-        // Показываем сообщение об успешном заказе
         successModal.style.display = 'block';
         
-        // Очищаем корзину
         cart.items = [];
         cart.save();
         cart.updateCartDisplay();
+        cart.updateProductCards();
         
-        // Сбрасываем форму
         orderForm.reset();
     });
     
-    // Закрытие сообщения об успешном заказе
     closeSuccess.addEventListener('click', function() {
         successModal.style.display = 'none';
     });
     
-    // Закрытие модальных окон при клике вне их
     window.addEventListener('click', function(e) {
         if (e.target === cartModal) {
             cartModal.style.display = 'none';
@@ -352,7 +379,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Плавная прокрутка для навигационных ссылок
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
             e.preventDefault();
@@ -366,5 +392,3 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
-
-
