@@ -4,7 +4,7 @@ const products = [
         id: 1,
         name: "Смартфон Samsung Galaxy S21",
         price: 59990,
-        image: "images/smartphone.jpg",
+        image: "images/7384989961.jpg",
         description: "Флагманский смартфон с отличной камерой и производительностью. 128 ГБ памяти."
     },
     {
@@ -392,3 +392,4 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
