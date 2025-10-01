@@ -359,6 +359,42 @@ body {
     margin-bottom: 1rem;
 }
 
+/* Стили для пустой корзины */
+.empty-cart {
+    text-align: center;
+    padding: 2rem;
+}
+
+.empty-cart p {
+    margin: 0.5rem 0;
+}
+
+/* Защита от некорректных данных */
+.cart-item {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background: white;
+}
+
+.cart-item-title {
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.cart-item-price {
+    color: #666;
+}
+
+.cart-item-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
 /* ===== ФОРМА ЗАКАЗА ===== */
 .order-form {
     margin-top: 1.5rem;
@@ -492,3 +528,4 @@ body {
         padding: 1rem;
     }
 }
+
