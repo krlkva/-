@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ТехноМаркет - Интернет-магазин техники</title>
+    <meta name="description" content="Лучшая техника по доступным ценам с гарантией качества">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Шапка сайта -->
     <header class="header">
         <div class="container">
             <h1 class="logo">ТехноМаркет</h1>
@@ -24,9 +24,7 @@
         </div>
     </header>
 
-    <!-- Основное содержимое страницы -->
     <main class="main">
-        <!-- Герой-секция -->
         <section class="hero" id="home">
             <div class="container">
                 <h2>Добро пожаловать в ТехноМаркет!</h2>
@@ -34,17 +32,15 @@
             </div>
         </section>
 
-        <!-- Секция с товарами -->
         <section class="products" id="products">
             <div class="container">
                 <h2>Наши товары</h2>
                 <div class="products-grid" id="products-grid">
-                    <!-- Товары будут загружены через JavaScript -->
+                    <!-- Товары загружаются через JavaScript -->
                 </div>
             </div>
         </section>
 
-        <!-- Секция "О нас" -->
         <section class="about" id="about">
             <div class="container">
                 <h2>О нашем магазине</h2>
@@ -53,13 +49,13 @@
         </section>
     </main>
 
-    <!-- Модальное окно корзины -->
+    <!-- Модальные окна -->
     <div class="modal" id="cart-modal">
         <div class="modal-content">
             <span class="close" id="close-cart">&times;</span>
             <h2>Ваша корзина</h2>
             <div class="cart-items" id="cart-items">
-                <!-- Товары в корзине будут загружены через JavaScript -->
+                <!-- Содержимое корзины -->
             </div>
             <div class="cart-total">
                 <p>Итого: <span id="total-price">0</span> руб.</p>
@@ -68,7 +64,6 @@
         </div>
     </div>
 
-    <!-- Модальное окно оформления заказа -->
     <div class="modal" id="order-modal">
         <div class="modal-content">
             <span class="close" id="close-order">&times;</span>
@@ -95,7 +90,6 @@
         </div>
     </div>
 
-    <!-- Модальное окно успешного заказа -->
     <div class="modal" id="success-modal">
         <div class="modal-content">
             <h2>Заказ создан!</h2>
@@ -104,11 +98,9 @@
         </div>
     </div>
 
-    <!-- Подвал сайта -->
     <footer class="footer">
         <div class="container">
             <p>&copy; 2023 ТехноМаркет. Все права защищены.</p>
-            <p>Телефон: +7 (999) 123-45-67 | Email: info@technomarket.ru</p>
         </div>
     </footer>
 
