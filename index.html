@@ -3,237 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Магазин товаров</title>
-    <style>
-        /* Базовые стили */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Arial', sans-serif;
-        }
-
-        body {
-            background-color: #f8f8f8;
-            color: #333;
-            line-height: 1.6;
-            padding: 20px;
-        }
-
-        /* Шапка */
-        header {
-            background-color: #fff;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            padding: 1rem;
-            margin-bottom: 2rem;
-            border-radius: 8px;
-        }
-
-        nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: bold;
-        }
-
-        .nav-links {
-            display: flex;
-            list-style: none;
-        }
-
-        .nav-links li {
-            margin-left: 1.5rem;
-        }
-
-        .nav-links a {
-            text-decoration: none;
-            color: #333;
-        }
-
-        /* Основной контент */
-        main {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .products h1 {
-            margin-bottom: 2rem;
-            text-align: center;
-        }
-
-        /* Сетка товаров */
-        .products-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 2rem;
-        }
-
-        /* Карточка товара */
-        .product-card {
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            padding: 1rem;
-        }
-
-        .product-image {
-            height: 150px;
-            background-color: #f0f0f0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 1rem;
-            border-radius: 4px;
-        }
-
-        .product-title {
-            font-size: 1.1rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .product-price {
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 1rem;
-        }
-
-        .add-to-cart {
-            width: 100%;
-            padding: 0.75rem;
-            background-color: #333;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        /* Адаптивность */
-        @media (max-width: 768px) {
-            .products-grid {
-                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-                gap: 1rem;
-            }
-            
-            nav {
-                flex-direction: column;
-            }
-            
-            .nav-links {
-                margin-top: 1rem;
-            }
-        }
-    </style>
+    <title>Интернет-магазин</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/responsive.css">
 </head>
 <body>
-    <header>
-        <nav>
-            <div class="logo">Магазин</div>
-            <ul class="nav-links">
-                <li><a href="#">Главная</a></li>
-                <li><a href="#">Каталог</a></li>
-                <li><a href="#">О нас</a></li>
-                <li class="cart-icon">
-                    Корзина (<span id="cart-count">0</span>)
-                </li>
-            </ul>
-        </nav>
+    <!-- Шапка сайта -->
+    <header class="header">
+        <div class="container">
+            <h1 class="logo">Магазин Техники</h1>
+            <nav class="nav">
+                <ul class="nav-list">
+                    <li><a href="#home">Главная</a></li>
+                    <li><a href="#products">Товары</a></li>
+                    <li><a href="#about">О нас</a></li>
+                </ul>
+            </nav>
+            <div class="cart-icon" id="cart-icon">
+                🛒 Корзина (<span id="cart-count">0</span>)
+            </div>
+        </div>
     </header>
 
-    <main>
-        <section class="products">
-            <h1>Наши товары</h1>
-            <div class="products-grid" id="products-container">
-                <!-- Товары будут добавляться через JavaScript -->
+    <!-- Основной контент -->
+    <main class="main">
+        <section class="hero" id="home">
+            <div class="container">
+                <h2>Добро пожаловать в наш магазин!</h2>
+                <p>Лучшие товары по доступным ценам</p>
+            </div>
+        </section>
+
+        <!-- Каталог товаров -->
+        <section class="products" id="products">
+            <div class="container">
+                <h2>Наши товары</h2>
+                <div class="products-grid" id="products-grid">
+                    <!-- Товары будут добавляться через JavaScript -->
+                </div>
             </div>
         </section>
     </main>
 
-    <script>
-        // Данные товаров
-        const products = [
-            { id: 1, name: "Черный планшет", price: 345 },
-            { id: 2, name: "Держатель для ручек", price: 55 },
-            { id: 3, name: "Набор черных маркеров", price: 81 },
-            { id: 4, name: "Керамический горшок", price: 14 },
-            { id: 5, name: "Черная скрепка", price: 10 },
-            { id: 6, name: "Цветная коробка", price: 126 },
-            { id: 7, name: "Трубчатая бумажная коробка", price: 67 },
-            { id: 8, name: "Синий горшок", price: 78 },
-            { id: 9, name: "Холодная металлическая коробка", price: 89 }
-        ];
+    <!-- Корзина (модальное окно) -->
+    <div class="modal" id="cart-modal">
+        <div class="modal-content">
+            <span class="close" id="close-cart">&times;</span>
+            <h2>Ваша корзина</h2>
+            <div class="cart-items" id="cart-items">
+                <!-- Товары в корзине будут добавляться через JavaScript -->
+            </div>
+            <div class="cart-total">
+                <p>Итого: <span id="total-price">0</span> руб.</p>
+                <button class="btn btn-primary" id="checkout-btn">Оформить заказ</button>
+            </div>
+        </div>
+    </div>
 
-        // Функция отображения товаров
-        function displayProducts() {
-            console.log('Запуск displayProducts');
-            const productsContainer = document.getElementById('products-container');
-            
-            if (!productsContainer) {
-                console.error('Не найден контейнер для товаров!');
-                return;
-            }
-            
-            console.log('Найден контейнер, товаров:', products.length);
-            
-            // Очищаем контейнер
-            productsContainer.innerHTML = '';
-            
-            // Создаем карточки для каждого товара
-            products.forEach(product => {
-                const productCard = document.createElement('div');
-                productCard.className = 'product-card';
-                
-                productCard.innerHTML = `
-                    <div class="product-image">${product.name}</div>
-                    <div class="product-info">
-                        <h3 class="product-title">${product.name}</h3>
-                        <p class="product-price">${product.price} руб.</p>
-                        <button class="add-to-cart" onclick="addToCart(${product.id})">Добавить в корзину</button>
-                    </div>
-                `;
-                
-                productsContainer.appendChild(productCard);
-            });
-            
-            console.log('Товары отображены');
-        }
+    <!-- Форма оформления заказа -->
+    <div class="modal" id="order-modal">
+        <div class="modal-content">
+            <span class="close" id="close-order">&times;</span>
+            <h2>Оформление заказа</h2>
+            <form id="order-form" class="order-form">
+                <div class="form-group">
+                    <label for="first-name">Имя:</label>
+                    <input type="text" id="first-name" name="first-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="last-name">Фамилия:</label>
+                    <input type="text" id="last-name" name="last-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="address">Адрес доставки:</label>
+                    <textarea id="address" name="address" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Телефон:</label>
+                    <input type="tel" id="phone" name="phone" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Создать заказ</button>
+            </form>
+        </div>
+    </div>
 
-        // Функция добавления в корзину
-        function addToCart(productId) {
-            console.log('Добавление товара в корзину:', productId);
-            alert('Товар добавлен в корзину! ID: ' + productId);
-            
-            // Обновляем счетчик корзины
-            const cartCount = document.getElementById('cart-count');
-            if (cartCount) {
-                const currentCount = parseInt(cartCount.textContent) || 0;
-                cartCount.textContent = currentCount + 1;
-            }
-        }
+    <!-- Сообщение об успешном заказе -->
+    <div class="modal" id="success-modal">
+        <div class="modal-content">
+            <h2>Заказ создан!</h2>
+            <p>Спасибо за ваш заказ. Мы свяжемся с вами в ближайшее время.</p>
+            <button class="btn btn-primary" id="close-success">OK</button>
+        </div>
+    </div>
 
-        // Запускаем когда страница полностью загружена
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM полностью загружен');
-            displayProducts();
-        });
+    <!-- Подвал сайта -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2023 Магазин Техники. Все права защищены.</p>
+        </div>
+    </footer>
 
-        // Альтернативный способ - запуск когда window загружен
-        window.onload = function() {
-            console.log('Window загружен');
-            displayProducts();
-        };
-
-        // Простой вызов для тестирования
-        console.log('Скрипт выполняется');
-        displayProducts();
-    </script>
+    <!-- Подключение JavaScript -->
+    <script src="js/products.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/main.js"></script>
 </body>
 </html>
-</body>
-</html>
-
-
