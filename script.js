@@ -9,9 +9,9 @@ const products = [
     },
     {
         id: 2,
-        name: "MacBook Air",
+        name: "MacBook Air M2",
         price: 99990,
-        image: "images/laptop.jpg",
+        image: "images/laptop.jpg", 
         description: "Легкий и мощный ноутбук"
     },
     {
@@ -30,7 +30,7 @@ const products = [
     },
     {
         id: 5,
-        name: "Apple Watch 7",
+        name: "Apple Watch Series 7",
         price: 32990,
         image: "images/smartwatch.jpg",
         description: "Умные часы с функциями здоровья"
@@ -51,14 +51,14 @@ const products = [
     },
     {
         id: 8,
-        name: "LG OLED TV",
+        name: "LG OLED C1",
         price: 89990,
         image: "images/tv.jpg",
         description: "4K телевизор с OLED дисплеем"
     }
 ];
 
-// Корзина
+// Корзина (остальной код без изменений)
 const cart = {
     items: [],
     
@@ -152,10 +152,10 @@ const cart = {
         
         if (this.items.length === 0) {
             cartItems.innerHTML = `
-                <div style="text-align: center; padding: 3rem; color: #64748b;">
-                    <p style="font-size: 3rem; margin-bottom: 1rem;">🛒</p>
-                    <p style="margin-bottom: 0.5rem;">Корзина пуста</p>
-                    <p style="font-size: 0.9rem;">Добавьте товары из каталога</p>
+                <div style="text-align: center; padding: 3rem; color: #718096;">
+                    <p style="font-size: 4rem; margin-bottom: 1.5rem;">🛒</p>
+                    <p style="font-size: 1.3rem; margin-bottom: 0.75rem; font-weight: 700;">Корзина пуста</p>
+                    <p style="font-size: 1rem;">Добавьте товары из каталога</p>
                 </div>
             `;
             if (totalPrice) totalPrice.textContent = '0';
