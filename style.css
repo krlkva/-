@@ -8,13 +8,13 @@
 :root {
     --primary: #001f3f; /* Navy */
     --primary-dark: #001a35;
-    --background: #fefaf0; /* Светло-бежевый */
+    --background: #ffffff; /* Белый фон */
     --text: #1a202c;
     --text-light: #666;
     --border: #e2e2e2;
     --white: #ffffff;
     --shadow: 0 1px 3px rgba(0,0,0,0.1);
-    --radius: 6px;
+    --radius: 8px; /* Скругленные рамки */
 }
 
 body {
@@ -22,12 +22,12 @@ body {
     line-height: 1.5;
     color: var(--text);
     background-color: var(--background);
-    font-weight: 400;
+    font-weight: 600; /* Более жирный шрифт */
 }
 
 .container {
     max-width: 1200px;
-    margin: 0 auto;
+    margin:  auto;
     padding: 0 1rem;
 }
 
@@ -49,7 +49,7 @@ body {
 
 .logo {
     font-size: 1.25rem;
-    font-weight: 600;
+    font-weight: 700; /* Жирный */
     color: var(--primary);
 }
 
@@ -62,7 +62,7 @@ body {
 .nav-list a {
     color: var(--text);
     text-decoration: none;
-    font-weight: 500;
+    font-weight: 600; /* Жирный */
     transition: color 0.2s;
 }
 
@@ -74,9 +74,9 @@ body {
     background: var(--primary);
     color: var(--white);
     padding: 0.5rem 1rem;
-    border-radius: var(--radius);
+    border-radius: 20px; /* Кружочек */
     cursor: pointer;
-    font-weight: 500;
+    font-weight: 600; /* Жирный */
     border: none;
     font-size: 0.9rem;
 }
@@ -92,12 +92,13 @@ body {
 
 .hero h2 {
     font-size: 1.75rem;
-    font-weight: 600;
+    font-weight: 700; /* Жирный */
     margin-bottom: 0.5rem;
 }
 
 .hero p {
     opacity: 0.9;
+    font-weight: 600; /* Жирный */
 }
 
 /* ===== СЕКЦИЯ ТОВАРОВ ===== */
@@ -108,7 +109,7 @@ body {
 .products h2 {
     text-align: center;
     font-size: 1.5rem;
-    font-weight: 600;
+    font-weight: 700; /* Жирный */
     margin-bottom: 2rem;
     color: var(--text);
 }
@@ -123,7 +124,7 @@ body {
 /* ===== КАРТОЧКА ТОВАРА ===== */
 .product-card {
     background: var(--white);
-    border-radius: var(--radius);
+    border-radius: var(--radius); /* Скругленные рамки */
     border: 1px solid var(--primary);
     transition: all 0.2s;
 }
@@ -136,10 +137,11 @@ body {
     width: 100%;
     height: 160px;
     overflow: hidden;
-    background: var(--background);
+    background: #f8f9fa;
     display: flex;
     align-items: center;
     justify-content: center;
+    border-radius: var(--radius) var(--radius) 0 0; /* Скругление сверху */
 }
 
 .product-image {
@@ -159,7 +161,7 @@ body {
 
 .product-title {
     font-size: 1rem;
-    font-weight: 600;
+    font-weight: 700; /* Жирный */
     margin-bottom: 0.5rem;
     color: var(--text);
 }
@@ -169,11 +171,12 @@ body {
     margin-bottom: 0.75rem;
     font-size: 0.85rem;
     line-height: 1.4;
+    font-weight: 500;
 }
 
 .product-price {
     font-size: 1.1rem;
-    font-weight: 600;
+    font-weight: 700; /* Жирный */
     color: var(--primary);
     margin-bottom: 0.75rem;
 }
@@ -183,10 +186,10 @@ body {
     display: inline-block;
     padding: 0.6rem 1rem;
     border: none;
-    border-radius: var(--radius);
+    border-radius: var(--radius); /* Скругленные кнопки */
     cursor: pointer;
     font-size: 0.9rem;
-    font-weight: 500;
+    font-weight: 600; /* Жирный */
     transition: all 0.2s;
     text-decoration: none;
     text-align: center;
@@ -206,6 +209,7 @@ body {
 .btn-danger {
     background: #dc2626;
     color: var(--white);
+    border-radius: 20px; /* Кружочек */
 }
 
 .btn-danger:hover {
@@ -226,10 +230,10 @@ body {
     border: 1px solid var(--primary);
     width: 28px;
     height: 28px;
-    border-radius: 4px;
+    border-radius: 50%; /* Кружочки */
     cursor: pointer;
     font-size: 0.9rem;
-    font-weight: 500;
+    font-weight: 600; /* Жирный */
     transition: all 0.2s;
     display: flex;
     align-items: center;
@@ -242,7 +246,7 @@ body {
 }
 
 .quantity {
-    font-weight: 600;
+    font-weight: 700; /* Жирный */
     font-size: 0.9rem;
     min-width: 25px;
     text-align: center;
@@ -265,7 +269,7 @@ body {
     background-color: var(--white);
     margin: 2rem auto;
     padding: 2rem;
-    border-radius: var(--radius);
+    border-radius: var(--radius); /* Скругленные модальные окна */
     width: 90%;
     max-width: 500px;
     max-height: 80vh;
@@ -294,7 +298,7 @@ body {
 .modal-content h2 {
     margin-bottom: 1.5rem;
     font-size: 1.25rem;
-    font-weight: 600;
+    font-weight: 700; /* Жирный */
     color: var(--text);
 }
 
@@ -320,7 +324,7 @@ body {
 }
 
 .cart-item-title {
-    font-weight: 600;
+    font-weight: 700; /* Жирный */
     margin-bottom: 0.25rem;
     color: var(--text);
 }
@@ -328,6 +332,7 @@ body {
 .cart-item-price {
     color: var(--text-light);
     font-size: 0.9rem;
+    font-weight: 600; /* Жирный */
 }
 
 .cart-item-controls {
@@ -341,10 +346,11 @@ body {
     border: 1px solid var(--border);
     color: var(--text-light);
     padding: 0.4rem 0.8rem;
-    border-radius: 4px;
+    border-radius: 20px; /* Кружочек */
     cursor: pointer;
     font-size: 0.8rem;
     transition: all 0.2s;
+    font-weight: 600; /* Жирный */
 }
 
 .remove-btn:hover {
@@ -356,14 +362,14 @@ body {
 .cart-total {
     background: var(--primary);
     padding: 1.5rem;
-    border-radius: var(--radius);
+    border-radius: var(--radius); /* Скругленный тотал */
     text-align: center;
     margin-top: 1.5rem;
 }
 
 .cart-total p {
     font-size: 1.1rem;
-    font-weight: 600;
+    font-weight: 700; /* Жирный */
     margin-bottom: 1rem;
     color: var(--white);
 }
@@ -380,7 +386,7 @@ body {
 .form-group label {
     display: block;
     margin-bottom: 0.5rem;
-    font-weight: 500;
+    font-weight: 600; /* Жирный */
     color: var(--text);
     font-size: 0.9rem;
 }
@@ -390,11 +396,12 @@ body {
     width: 100%;
     padding: 0.75rem;
     border: 1px solid var(--border);
-    border-radius: var(--radius);
+    border-radius: var(--radius); /* Скругленные инпуты */
     font-size: 0.9rem;
     transition: all 0.2s;
     font-family: inherit;
     background: var(--white);
+    font-weight: 500;
 }
 
 .form-group input:focus,
@@ -415,7 +422,7 @@ body {
 .about h2 {
     margin-bottom: 1rem;
     font-size: 1.5rem;
-    font-weight: 600;
+    font-weight: 700; /* Жирный */
 }
 
 .about p {
@@ -423,6 +430,7 @@ body {
     max-width: 600px;
     margin: 0 auto;
     line-height: 1.6;
+    font-weight: 600; /* Жирный */
 }
 
 /* ===== ПОДВАЛ ===== */
@@ -431,12 +439,14 @@ body {
     color: var(--white);
     text-align: center;
     padding: 2rem 0;
+    border-radius: var(--radius) var(--radius) 0 0; /* Скругленный сверху */
 }
 
 .footer p {
     margin-bottom: 0.5rem;
     opacity: 0.8;
     font-size: 0.9rem;
+    font-weight: 600; /* Жирный */
 }
 
 /* ===== УВЕДОМЛЕНИЯ ===== */
@@ -447,11 +457,11 @@ body {
     background: var(--primary);
     color: var(--white);
     padding: 1rem 1.5rem;
-    border-radius: var(--radius);
+    border-radius: 20px; /* Кружочек */
     z-index: 1001;
     box-shadow: var(--shadow);
     animation: slideInRight 0.3s ease;
-    font-weight: 500;
+    font-weight: 600; /* Жирный */
     max-width: 300px;
 }
 
