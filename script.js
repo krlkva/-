@@ -4,7 +4,7 @@ const products = [
         id: 1,
         name: "Samsung Galaxy S21",
         price: 59990,
-        image: "images/smartphone.jpg",
+        image: "images/7384989961.jpg",
         description: "Флагманский смартфон с отличной камерой"
     },
     {
@@ -380,5 +380,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.target === successModal) successModal.style.display = 'none';
     });
 });
+
 
 
