@@ -152,9 +152,9 @@ const cart = {
     
     if (this.items.length === 0) {
         cartItems.innerHTML = `
-            <div style="text-align: center; padding: 3rem; color: #666;">
-                <p style="margin-bottom: 0.5rem; font-weight: 600;">Корзина пуста</p>
-                <p style="font-size: 0.9rem;">Добавьте товары из каталога</p>
+            <div style="text-align: center; padding: 4rem 2rem; color: #666;">
+                <p style="margin-bottom: 1rem; font-weight: 700; font-size: 1.3rem; letter-spacing: -0.02em;">КОРЗИНА ПУСТА</p>
+                <p style="font-size: 1rem; color: #999; letter-spacing: -0.01em;">Добавьте товары из каталога</p>
             </div>
         `;
         if (totalPrice) totalPrice.textContent = '0';
@@ -254,7 +254,7 @@ function displayProducts() {
             <div class="product-image-container">
                 <img src="${product.image}" alt="${product.name}" class="product-image"
                      onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
-                <div class="product-image-placeholder" style="display: none;">📱</div>
+                <div class="product-image-placeholder" style="display: none;"></div>
             </div>
             <div class="product-info">
                 <h3 class="product-title">${product.name}</h3>
@@ -380,4 +380,5 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.target === successModal) successModal.style.display = 'none';
     });
 });
+
 
