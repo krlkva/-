@@ -142,25 +142,24 @@ const cart = {
         this.displayCartItems();
     },
     
-    displayCartItems() {
-        const cartItems = document.getElementById('cart-items');
-        const totalPrice = document.getElementById('total-price');
-        
-        if (!cartItems) return;
-        
-        cartItems.innerHTML = '';
-        
-        if (this.items.length === 0) {
-            cartItems.innerHTML = `
-                <div style="text-align: center; padding: 3rem; color: #666;">
-                    <p style="font-size: 3rem; margin-bottom: 1rem;">🛒</p>
-                    <p style="margin-bottom: 0.5rem;">Корзина пуста</p>
-                    <p style="font-size: 0.9rem;">Добавьте товары из каталога</p>
-                </div>
-            `;
-            if (totalPrice) totalPrice.textContent = '0';
-            return;
-        }
+   displayCartItems() {
+    const cartItems = document.getElementById('cart-items');
+    const totalPrice = document.getElementById('total-price');
+    
+    if (!cartItems) return;
+    
+    cartItems.innerHTML = '';
+    
+    if (this.items.length === 0) {
+        cartItems.innerHTML = `
+            <div style="text-align: center; padding: 3rem; color: #666;">
+                <p style="margin-bottom: 0.5rem; font-weight: 600;">Корзина пуста</p>
+                <p style="font-size: 0.9rem;">Добавьте товары из каталога</p>
+            </div>
+        `;
+        if (totalPrice) totalPrice.textContent = '0';
+        return;
+    }
         
         this.items.forEach(item => {
             const cartItem = document.createElement('div');
@@ -381,3 +380,4 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.target === successModal) successModal.style.display = 'none';
     });
 });
+
