@@ -58,7 +58,7 @@ const products = [
     }
 ];
 
-// Корзина (остальной код без изменений)
+// Корзина
 const cart = {
     items: [],
     
@@ -152,10 +152,10 @@ const cart = {
         
         if (this.items.length === 0) {
             cartItems.innerHTML = `
-                <div style="text-align: center; padding: 3rem; color: #718096;">
-                    <p style="font-size: 4rem; margin-bottom: 1.5rem;">🛒</p>
-                    <p style="font-size: 1.3rem; margin-bottom: 0.75rem; font-weight: 700;">Корзина пуста</p>
-                    <p style="font-size: 1rem;">Добавьте товары из каталога</p>
+                <div style="text-align: center; padding: 3rem; color: #666;">
+                    <p style="font-size: 3rem; margin-bottom: 1rem;">🛒</p>
+                    <p style="margin-bottom: 0.5rem;">Корзина пуста</p>
+                    <p style="font-size: 0.9rem;">Добавьте товары из каталога</p>
                 </div>
             `;
             if (totalPrice) totalPrice.textContent = '0';
