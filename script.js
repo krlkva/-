@@ -2,62 +2,62 @@
 const products = [
     {
         id: 1,
-        name: "Multi-Peptide+HA Serum",
-        price: 38400,
-        description: "Advanced anti-aging serum",
-        image: "https://images.unsplash.com/photo-1556228578-9c360e1d8d34?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+        name: "CLINIQUE cheek pop",
+        price: 2500,
+        description: "цвет Black Honey",
+        image: "images/blush 2.JPG",
         badge: "NEW"
     },
     {
         id: 2,
-        name: "Niacinamide 10% + Zinc 1%",
-        price: 12600,
-        description: "Oil control and brightening",
-        image: "https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
+        name: "Dior Backstage Glow Face Palette",
+        price: 8900,
+        description: "цвет 001",
+        image: "images/highlighter.JPG"
     },
     {
         id: 3,
-        name: "Lactic Acid 10% + HA",
-        price: 11000,
-        description: "Gentle exfoliation and hydration",
-        image: "https://images.unsplash.com/photo-1556228578-9c360e1d8d34?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+        name: "Гель-фиксатор для бровей PUSY",
+        price: 1000,
+        description: "Гель для бровей фиксурующий стойуий прозрачный 5мл",
+        image: "images/eyebrow_gel.JPG",
         badge: "BEST SELLER"
     },
     {
         id: 4,
-        name: "Hyaluronic Acid 2% + B5",
-        price: 19400,
-        description: "Intense hydration booster",
-        image: "https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
+        name: "Maybelline Sky High тушь для ресниц",
+        price: 1600,
+        description: "Тушь для ресниц удлиняющаяя и объемная",
+        image: "images/mascara.JPG"
     },
     {
         id: 5,
-        name: "Buffer + Copper Peptides 1%",
-        price: 38500,
-        description: "Skin restoration and firming",
-        image: "https://images.unsplash.com/photo-1556228578-9c360e1d8d34?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+        name: "Кремовые румяна RHODE",
+        price: 6500,
+        description: "Кремовые румяна в стике оттенок Piggi",
+        image: "images/blush.JPG",
         badge: "NEW"
     },
     {
         id: 6,
-        name: "Caffeine Solution 5% + EGCG",
-        price: 11000,
-        description: "Eye area treatment",
-        image: "https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
+        name: "Блеск для губ KIKO Milano Lip Volume",
+        price: 1100,
+        description: "цвет Tutu Rose",
+        image: "images/lipgloss.JPG"
     },
     {
         id: 7,
-        name: "Glycolipid Cream Cleanser",
-        price: 17000,
-        description: "Gentle daily cleanser",
-        image: "https://images.unsplash.com/photo-1556228578-9c360e1d8d34?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
+        name: "Расческа Tangle Teezer The Ultimate",
+        price: 2000,
+        description: "Расческа The Ultimate (Wet) Detangler Henna Red",
+        image: "images/hairbrush.JPG"
     },
     {
         id: 8,
-        name: "100% Niacinamide Powder",
-        price: 8000,
-        description: "Custom concentration treatment",
-        image: "https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
+        name: "Miss Dior Eau De Parfum",
+        price: 11000,
+        description: "Парфюмерная вода",
+        image: "images/perfume.JPG"
     }
 ];
 
@@ -298,3 +298,4 @@ function removeFromCart(productId) {
     cart = cart.filter(item => item.id !== productId);
     renderCart();
 }
+
