@@ -2,7 +2,7 @@
 const products = [
     {
         id: 1,
-        name: "CLINIQUE cheek pop",
+        name: "CLINIQUE cheek pop цвет Black Honey",
         price: 2500,
         description: "цвет Black Honey",
         image: "images/blush 2.JPG",
@@ -32,7 +32,7 @@ const products = [
     },
     {
         id: 5,
-        name: "Кремовые румяна RHODE",
+        name: "Кремовые румяна RHODE в стике оттенок Piggi",
         price: 6500,
         description: "Кремовые румяна в стике оттенок Piggi",
         image: "images/blush.JPG",
@@ -54,7 +54,7 @@ const products = [
     },
     {
         id: 8,
-        name: "Miss Dior Eau De Parfum",
+        name: "Miss Dior Eau De Parfum Парфюмерная вода",
         price: 11000,
         description: "Парфюмерная вода",
         image: "images/perfume.JPG"
@@ -298,5 +298,6 @@ function removeFromCart(productId) {
     cart = cart.filter(item => item.id !== productId);
     renderCart();
 }
+
 
 
