@@ -101,7 +101,7 @@ function renderProducts() {
             <div class="product-info">
                 <h3 class="product-name">${product.name}</h3>
                 <p class="product-price">${product.price.toLocaleString()} ₽</p>
-                <button class="buy-btn" data-id="${product.id}">BUY</button>
+                <button class="buy-btn" data-id="${product.id}">КУПИТЬ</button>
             </div>
         `;
         
@@ -142,7 +142,7 @@ function renderCart() {
                     <button class="quantity-btn minus" data-id="${item.id}">-</button>
                     <span>${item.quantity}</span>
                     <button class="quantity-btn plus" data-id="${item.id}">+</button>
-                    <button class="remove-btn" data-id="${item.id}">REMOVE</button>
+                    <button class="remove-btn" data-id="${item.id}">УДАЛИТЬ</button>
                 </div>
             </div>
         `;
@@ -298,4 +298,5 @@ function removeFromCart(productId) {
     cart = cart.filter(item => item.id !== productId);
     renderCart();
 }
+
 
