@@ -2,7 +2,7 @@
 const products = [
     {
         id: 1,
-        name: "CLINIQUE cheek pop цвет Black Honey",
+        name: "CLINIQUE cheek pop оттенок Black Honey",
         price: 2500,
         description: "цвет Black Honey",
         image: "images/blush 2.JPG",
@@ -298,6 +298,7 @@ function removeFromCart(productId) {
     cart = cart.filter(item => item.id !== productId);
     renderCart();
 }
+
 
 
 
