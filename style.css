@@ -34,7 +34,7 @@ h1, h2, h3, h4 {
     letter-spacing: 1px;
 }
 
-/* Шапка */
+/* Шапка - упрощенная */
 .header {
     border-bottom: 1px solid var(--border-color);
     padding: 20px 0;
@@ -56,22 +56,11 @@ h1, h2, h3, h4 {
     text-decoration: none;
 }
 
-.nav ul {
-    display: flex;
-    list-style: none;
-    gap: 40px;
-}
-
-.nav a {
-    color: var(--text-color);
-    text-decoration: none;
+.lab-title {
     font-size: 14px;
     letter-spacing: 1px;
-    text-transform: uppercase;
-}
-
-.nav a:hover {
-    color: var(--accent-color);
+    color: var(--light-text);
+    text-transform: lowercase;
 }
 
 .header-icons {
@@ -103,15 +92,12 @@ h1, h2, h3, h4 {
     justify-content: center;
 }
 
-/* Каталог товаров */
+/* Каталог товаров - упрощенный */
 .products {
     padding: 60px 0;
 }
 
 .products-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     margin-bottom: 40px;
     padding-bottom: 20px;
     border-bottom: 1px solid var(--border-color);
@@ -120,22 +106,7 @@ h1, h2, h3, h4 {
 .section-title {
     font-size: 24px;
     letter-spacing: 2px;
-}
-
-.filter-controls {
-    display: flex;
-    gap: 20px;
-}
-
-.filter-select {
-    padding: 8px 16px;
-    border: 1px solid var(--border-color);
-    background: var(--white);
-    font-family: 'Inter', sans-serif;
-    font-weight: 300;
-    font-size: 14px;
-    color: var(--text-color);
-    cursor: pointer;
+    text-align: center;
 }
 
 /* Сетка товаров с рамками-решетками */
@@ -506,97 +477,28 @@ form {
     }
 }
 
-/* Футер */
+/* Футер - упрощенный */
 .footer {
     border-top: 1px solid var(--border-color);
-    padding: 60px 0 30px;
-}
-
-.footer-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 40px;
-    margin-bottom: 40px;
-}
-
-.footer-col h4 {
-    font-size: 14px;
-    letter-spacing: 2px;
-    margin-bottom: 20px;
-    text-transform: uppercase;
-}
-
-.footer-col ul {
-    list-style: none;
-}
-
-.footer-col li {
-    margin-bottom: 10px;
-}
-
-.footer-col a {
-    color: var(--light-text);
-    text-decoration: none;
-    font-size: 14px;
-}
-
-.footer-col a:hover {
-    color: var(--accent-color);
-}
-
-.newsletter {
-    display: flex;
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 5px;
-}
-
-.newsletter input {
-    flex: 1;
-    border: none;
-    background: none;
-    font-family: 'Inter', sans-serif;
-    font-weight: 300;
-    font-size: 14px;
-    padding: 5px 0;
-}
-
-.newsletter input:focus {
-    outline: none;
-}
-
-.newsletter button {
-    background: none;
-    border: none;
-    color: var(--light-text);
-    cursor: pointer;
-}
-
-.social-links {
-    display: flex;
-    gap: 15px;
-}
-
-.social-links a {
-    color: var(--text-color);
-    font-size: 16px;
+    padding: 30px 0;
+    margin-top: 60px;
 }
 
 .footer-bottom {
     text-align: center;
-    padding-top: 30px;
-    border-top: 1px solid var(--border-color);
     color: var(--light-text);
-    font-size: 12px;
+    font-size: 14px;
+}
+
+.footer-bottom p {
+    font-weight: 300;
+    letter-spacing: 0.5px;
 }
 
 /* Адаптивность */
 @media (max-width: 1024px) {
     .products-grid {
         grid-template-columns: repeat(3, 1fr);
-    }
-    
-    .footer-grid {
-        grid-template-columns: repeat(2, 1fr);
     }
 }
 
@@ -605,15 +507,6 @@ form {
         flex-direction: column;
         align-items: flex-start;
         gap: 20px;
-    }
-    
-    .filter-controls {
-        width: 100%;
-        flex-direction: column;
-    }
-    
-    .filter-select {
-        width: 100%;
     }
     
     .products-grid {
@@ -640,17 +533,10 @@ form {
     .header-content {
         flex-direction: column;
         gap: 15px;
-    }
-    
-    .nav ul {
-        gap: 20px;
+        text-align: center;
     }
     
     .products-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .footer-grid {
         grid-template-columns: 1fr;
     }
     
