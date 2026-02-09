@@ -1,52 +1,63 @@
-// Данные товаров
+// Данные товаров с изображениями
 const products = [
     {
         id: 1,
         name: "Multi-Peptide+HA Serum",
         price: 38400,
-        description: "Сыворотка с мульти-пептидами и гиалуроновой кислотой"
+        description: "Advanced anti-aging serum",
+        image: "https://images.unsplash.com/photo-1556228578-9c360e1d8d34?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+        badge: "NEW"
     },
     {
         id: 2,
-        name: "Niacinamide 10%+Zinc 1%",
+        name: "Niacinamide 10% + Zinc 1%",
         price: 12600,
-        description: "Ниацинамид 10% и цинк 1% для сияния кожи"
+        description: "Oil control and brightening",
+        image: "https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
     },
     {
         id: 3,
-        name: "Lactic Acid 10%+HA",
+        name: "Lactic Acid 10% + HA",
         price: 11000,
-        description: "Молочная кислота 10% и гиалуроновая кислота"
+        description: "Gentle exfoliation and hydration",
+        image: "https://images.unsplash.com/photo-1556228578-9c360e1d8d34?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+        badge: "BEST SELLER"
     },
     {
         id: 4,
-        name: "Hyaluronic Acid 2%+B5",
+        name: "Hyaluronic Acid 2% + B5",
         price: 19400,
-        description: "Гиалуроновая кислота 2% и витамин B5"
+        description: "Intense hydration booster",
+        image: "https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
     },
     {
         id: 5,
-        name: "Buffer+Copper Peptides 1%",
+        name: "Buffer + Copper Peptides 1%",
         price: 38500,
-        description: "Буфер и медные пептиды 1%"
+        description: "Skin restoration and firming",
+        image: "https://images.unsplash.com/photo-1556228578-9c360e1d8d34?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+        badge: "NEW"
     },
     {
         id: 6,
-        name: "Caffeine Solution 5%+EGCG",
+        name: "Caffeine Solution 5% + EGCG",
         price: 11000,
-        description: "Раствор кофеина 5% и EGCG"
+        description: "Eye area treatment",
+        image: "https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
     },
     {
         id: 7,
         name: "Glycolipid Cream Cleanser",
         price: 17000,
-        description: "Гликолипидный крем-очиститель"
+        description: "Gentle daily cleanser",
+        image: "https://images.unsplash.com/photo-1556228578-9c360e1d8d34?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
     },
     {
         id: 8,
         name: "100% Niacinamide Powder",
         price: 8000,
-        description: "100% порошок ниацинамида"
+        description: "Custom concentration treatment",
+        image: "https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
     }
 ];
 
@@ -55,7 +66,7 @@ let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
 // DOM элементы
 const productsContainer = document.getElementById('products-container');
-const cartSection = document.getElementById('cart-section');
+const cartSidebar = document.getElementById('cart-sidebar');
 const cartItemsContainer = document.getElementById('cart-items');
 const emptyCartMsg = document.getElementById('empty-cart');
 const cartCount = document.getElementById('cart-count');
@@ -63,12 +74,12 @@ const totalPrice = document.getElementById('total-price');
 const cartBtn = document.getElementById('cart-btn');
 const closeCartBtn = document.getElementById('close-cart');
 const checkoutBtn = document.getElementById('checkout-btn');
-const orderFormSection = document.getElementById('order-form-section');
+const modalOverlay = document.getElementById('modal-overlay');
 const closeFormBtn = document.getElementById('close-form');
 const orderForm = document.getElementById('order-form');
 const orderSuccess = document.getElementById('order-success');
 
-// Инициализация при загрузке страницы
+// Инициализация
 document.addEventListener('DOMContentLoaded', () => {
     renderProducts();
     renderCart();
@@ -83,14 +94,14 @@ function renderProducts() {
         const productCard = document.createElement('div');
         productCard.className = 'product-card';
         productCard.innerHTML = `
-            <div class="product-img">
-                <i class="fas fa-spa"></i>
+            <div class="product-image">
+                <img src="${product.image}" alt="${product.name}" loading="lazy">
+                ${product.badge ? `<div class="product-badge">${product.badge}</div>` : ''}
             </div>
             <div class="product-info">
                 <h3 class="product-name">${product.name}</h3>
-                <p>${product.description}</p>
                 <p class="product-price">${product.price.toLocaleString()} ₽</p>
-                <button class="add-to-cart" data-id="${product.id}">Добавить в корзину</button>
+                <button class="buy-btn" data-id="${product.id}">BUY</button>
             </div>
         `;
         
@@ -121,17 +132,18 @@ function renderCart() {
         const cartItem = document.createElement('div');
         cartItem.className = 'cart-item';
         cartItem.innerHTML = `
-            <div class="cart-item-info">
-                <div class="cart-item-name">${item.name}</div>
-                <div class="cart-item-price">${item.price.toLocaleString()} ₽ × ${item.quantity}</div>
+            <div class="cart-item-image">
+                <img src="${item.image}" alt="${item.name}" loading="lazy">
             </div>
-            <div class="cart-item-controls">
-                <button class="quantity-btn minus" data-id="${item.id}">-</button>
-                <span>${item.quantity}</span>
-                <button class="quantity-btn plus" data-id="${item.id}">+</button>
-                <button class="remove-item" data-id="${item.id}">
-                    <i class="fas fa-trash"></i>
-                </button>
+            <div class="cart-item-details">
+                <div class="cart-item-name">${item.name}</div>
+                <div class="cart-item-price">${item.price.toLocaleString()} ₽</div>
+                <div class="cart-item-controls">
+                    <button class="quantity-btn minus" data-id="${item.id}">-</button>
+                    <span>${item.quantity}</span>
+                    <button class="quantity-btn plus" data-id="${item.id}">+</button>
+                    <button class="remove-btn" data-id="${item.id}">REMOVE</button>
+                </div>
             </div>
         `;
         
@@ -141,15 +153,14 @@ function renderCart() {
     cartCount.textContent = count;
     totalPrice.textContent = total.toLocaleString();
     
-    // Сохраняем корзину в localStorage
     localStorage.setItem('cart', JSON.stringify(cart));
 }
 
 // Настройка обработчиков событий
 function setupEventListeners() {
-    // Добавление товара в корзину
+    // Добавление в корзину
     productsContainer.addEventListener('click', (e) => {
-        if (e.target.classList.contains('add-to-cart')) {
+        if (e.target.classList.contains('buy-btn')) {
             const productId = parseInt(e.target.dataset.id);
             addToCart(productId);
         }
@@ -157,84 +168,90 @@ function setupEventListeners() {
     
     // Управление корзиной
     cartItemsContainer.addEventListener('click', (e) => {
-        const productId = parseInt(e.target.closest('button')?.dataset.id);
+        const btn = e.target.closest('button');
+        if (!btn) return;
         
-        if (!productId) return;
+        const productId = parseInt(btn.dataset.id);
         
-        if (e.target.classList.contains('plus') || e.target.closest('.plus')) {
+        if (btn.classList.contains('plus')) {
             updateQuantity(productId, 1);
-        } else if (e.target.classList.contains('minus') || e.target.closest('.minus')) {
+        } else if (btn.classList.contains('minus')) {
             updateQuantity(productId, -1);
-        } else if (e.target.classList.contains('remove-item') || e.target.closest('.remove-item')) {
+        } else if (btn.classList.contains('remove-btn')) {
             removeFromCart(productId);
         }
     });
     
     // Открытие/закрытие корзины
     cartBtn.addEventListener('click', () => {
-        cartSection.style.display = 'block';
-        orderFormSection.style.display = 'none';
+        cartSidebar.classList.add('active');
     });
     
     closeCartBtn.addEventListener('click', () => {
-        cartSection.style.display = 'none';
+        cartSidebar.classList.remove('active');
     });
     
     // Оформление заказа
     checkoutBtn.addEventListener('click', () => {
         if (cart.length === 0) {
-            alert('Корзина пуста. Добавьте товары перед оформлением заказа.');
+            alert('Your cart is empty');
             return;
         }
         
-        cartSection.style.display = 'none';
-        orderFormSection.style.display = 'block';
+        cartSidebar.classList.remove('active');
+        modalOverlay.classList.add('active');
     });
     
+    // Закрытие формы
     closeFormBtn.addEventListener('click', () => {
-        orderFormSection.style.display = 'none';
+        modalOverlay.classList.remove('active');
     });
     
-    // Отправка формы заказа
+    modalOverlay.addEventListener('click', (e) => {
+        if (e.target === modalOverlay) {
+            modalOverlay.classList.remove('active');
+        }
+    });
+    
+    // Отправка формы
     orderForm.addEventListener('submit', (e) => {
         e.preventDefault();
         
-        // Получаем данные формы
         const formData = new FormData(orderForm);
         const order = {
             firstName: formData.get('first-name'),
             lastName: formData.get('last-name'),
             address: formData.get('address'),
             phone: formData.get('phone'),
+            email: formData.get('email'),
             items: cart,
             total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
             date: new Date().toISOString()
         };
         
-        // В реальном приложении здесь была бы отправка данных на сервер
-        console.log('Заказ создан:', order);
+        console.log('Order placed:', order);
         
-        // Показываем сообщение об успехе
-        orderSuccess.style.display = 'block';
+        // Показываем уведомление
+        orderSuccess.classList.add('active');
         
         // Очищаем корзину
         cart = [];
         renderCart();
         
-        // Скрываем форму
-        orderFormSection.style.display = 'none';
+        // Закрываем форму
+        modalOverlay.classList.remove('active');
         
         // Сбрасываем форму
         orderForm.reset();
         
-        // Скрываем сообщение через 3 секунды
+        // Скрываем уведомление
         setTimeout(() => {
-            orderSuccess.style.display = 'none';
+            orderSuccess.classList.remove('active');
         }, 3000);
     });
 }
 
-// Добавление товара в корзину
+// Функции корзины
 function addToCart(productId) {
     const product = products.find(p => p.id === productId);
     
@@ -249,21 +266,20 @@ function addToCart(productId) {
             id: product.id,
             name: product.name,
             price: product.price,
+            image: product.image,
             quantity: 1
         });
     }
     
     renderCart();
     
-    // Анимация добавления
-    const cartBtn = document.getElementById('cart-btn');
+    // Анимация
     cartBtn.style.transform = 'scale(1.2)';
     setTimeout(() => {
         cartBtn.style.transform = 'scale(1)';
     }, 200);
 }
 
-// Изменение количества товара
 function updateQuantity(productId, change) {
     const item = cart.find(item => item.id === productId);
     
@@ -278,7 +294,6 @@ function updateQuantity(productId, change) {
     }
 }
 
-// Удаление товара из корзины
 function removeFromCart(productId) {
     cart = cart.filter(item => item.id !== productId);
     renderCart();
