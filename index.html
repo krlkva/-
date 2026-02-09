@@ -6,6 +6,7 @@
     <title>GLab Beauty - Магазин косметики</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
     <!-- Шапка -->
@@ -13,19 +14,22 @@
         <div class="container">
             <div class="header-content">
                 <div class="logo">
-                    <h1><a href="#">The GLab</a></h1>
+                    <h1><a href="#">GLAB</a></h1>
                 </div>
                 <nav class="nav">
                     <ul>
-                        <li><a href="#">Главная</a></li>
-                        <li><a href="#products">Товары</a></li>
-                        <li><a href="#about">О нас</a></li>
-                        <li><a href="#contact">Контакты</a></li>
+                        <li><a href="#">SHOP</a></li>
+                        <li><a href="#about">ABOUT</a></li>
+                        <li><a href="#contact">CONTACT</a></li>
+                        <li><a href="#">JOURNAL</a></li>
                     </ul>
                 </nav>
-                <div class="cart-icon">
-                    <button id="cart-btn">
-                        <i class="fas fa-shopping-cart"></i>
+                <div class="header-icons">
+                    <button class="icon-btn search-btn">
+                        <i class="fas fa-search"></i>
+                    </button>
+                    <button class="icon-btn" id="cart-btn">
+                        <i class="fas fa-shopping-bag"></i>
                         <span id="cart-count">0</span>
                     </button>
                 </div>
@@ -38,7 +42,24 @@
         <!-- Каталог товаров -->
         <section class="products" id="products">
             <div class="container">
-                <h2 class="section-title">Каталог товаров</h2>
+                <div class="products-header">
+                    <h2 class="section-title">CATALOGUE</h2>
+                    <div class="filter-controls">
+                        <select class="filter-select">
+                            <option>ALL SKINCARE</option>
+                            <option>SERUMS</option>
+                            <option>CLEANSERS</option>
+                            <option>TONERS</option>
+                        </select>
+                        <select class="filter-select">
+                            <option>SORT BY</option>
+                            <option>PRICE: LOW TO HIGH</option>
+                            <option>PRICE: HIGH TO LOW</option>
+                            <option>NAME: A-Z</option>
+                        </select>
+                    </div>
+                </div>
+                
                 <div class="products-grid" id="products-container">
                     <!-- Товары будут вставлены через JavaScript -->
                 </div>
@@ -46,68 +67,112 @@
         </section>
 
         <!-- Корзина (скрытая по умолчанию) -->
-        <section class="cart-section" id="cart-section">
-            <div class="container">
-                <div class="cart-header">
-                    <h2>Корзина</h2>
-                    <button id="close-cart">&times;</button>
-                </div>
-                <div class="cart-items" id="cart-items">
-                    <!-- Товары в корзине будут вставлены через JavaScript -->
-                    <p class="empty-cart" id="empty-cart">Корзина пуста</p>
-                </div>
-                <div class="cart-total">
-                    <p>Итого: <span id="total-price">0</span> ₽</p>
-                </div>
-                <button class="btn checkout-btn" id="checkout-btn">Оформить заказ</button>
+        <aside class="cart-sidebar" id="cart-sidebar">
+            <div class="cart-header">
+                <h3>YOUR BAG</h3>
+                <button class="close-btn" id="close-cart">&times;</button>
             </div>
-        </section>
+            <div class="cart-content">
+                <div class="cart-items" id="cart-items">
+                    <p class="empty-cart" id="empty-cart">Your bag is empty</p>
+                </div>
+                <div class="cart-footer">
+                    <div class="cart-total">
+                        <span>SUBTOTAL</span>
+                        <span id="total-price">0 ₽</span>
+                    </div>
+                    <button class="btn checkout-btn" id="checkout-btn">CHECKOUT</button>
+                </div>
+            </div>
+        </aside>
 
-        <!-- Форма заказа (скрытая по умолчанию) -->
-        <section class="order-form-section" id="order-form-section">
-            <div class="container">
-                <div class="form-header">
-                    <h2>Оформление заказа</h2>
-                    <button id="close-form">&times;</button>
+        <!-- Форма заказа (модальное окно) -->
+        <div class="modal-overlay" id="modal-overlay">
+            <div class="modal" id="order-modal">
+                <div class="modal-header">
+                    <h3>CHECKOUT</h3>
+                    <button class="close-btn" id="close-form">&times;</button>
                 </div>
                 <form id="order-form">
-                    <div class="form-group">
-                        <label for="first-name">Имя *</label>
-                        <input type="text" id="first-name" name="first-name" required>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="first-name">FIRST NAME *</label>
+                            <input type="text" id="first-name" name="first-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="last-name">LAST NAME *</label>
+                            <input type="text" id="last-name" name="last-name" required>
+                        </div>
                     </div>
                     <div class="form-group">
-                        <label for="last-name">Фамилия *</label>
-                        <input type="text" id="last-name" name="last-name" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="address">Адрес доставки *</label>
+                        <label for="address">DELIVERY ADDRESS *</label>
                         <textarea id="address" name="address" rows="3" required></textarea>
                     </div>
                     <div class="form-group">
-                        <label for="phone">Контактный телефон *</label>
+                        <label for="phone">PHONE NUMBER *</label>
                         <input type="tel" id="phone" name="phone" required>
                     </div>
-                    <button type="submit" class="btn submit-order">Создать заказ</button>
+                    <div class="form-group">
+                        <label for="email">EMAIL</label>
+                        <input type="email" id="email" name="email">
+                    </div>
+                    <button type="submit" class="btn submit-order">PLACE ORDER</button>
                 </form>
             </div>
-        </section>
+        </div>
     </main>
 
     <!-- Сообщение об успешном заказе -->
-    <div class="order-success" id="order-success">
-        <div class="success-content">
-            <p>Заказ создан!</p>
+    <div class="notification" id="order-success">
+        <div class="notification-content">
+            <i class="fas fa-check"></i>
+            <span>ORDER PLACED!</span>
         </div>
     </div>
 
     <!-- Футер -->
     <footer class="footer">
         <div class="container">
-            <p>&copy; 2023 GLab Beauty. Все права защищены.</p>
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h4>COMPANY</h4>
+                    <ul>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Store Locator</a></li>
+                        <li><a href="#">Careers</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>CUSTOMER CARE</h4>
+                    <ul>
+                        <li><a href="#">FAQ</a></li>
+                        <li><a href="#">Shipping & Delivery</a></li>
+                        <li><a href="#">Returns</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>NEWSLETTER</h4>
+                    <p>Subscribe for updates</p>
+                    <div class="newsletter">
+                        <input type="email" placeholder="Email Address">
+                        <button type="submit"><i class="fas fa-arrow-right"></i></button>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h4>SOCIAL</h4>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2023 GLab Beauty. All rights reserved.</p>
+            </div>
         </div>
     </footer>
 
     <script src="script.js"></script>
 </body>
 </html>
-
