@@ -3,107 +3,111 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ТехноМаркет - Интернет-магазин техники</title>
-    <meta name="description" content="Лучшая техника по доступным ценам с гарантией качества">
+    <title>GLab Beauty - Магазин косметики</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
+    <!-- Шапка -->
     <header class="header">
         <div class="container">
-            <h1 class="logo">ТехноМаркет</h1>
-            <nav class="nav">
-                <ul class="nav-list">
-                    <li><a href="#home">Главная</a></li>
-                    <li><a href="#products">Товары</a></li>
-                    <li><a href="#about">О нас</a></li>
-                </ul>
-            </nav>
-            <div class="cart-icon" id="cart-icon">
-                🛒 Корзина (<span id="cart-count">0</span>)
+            <div class="header-content">
+                <div class="logo">
+                    <h1><a href="#">The GLab</a></h1>
+                </div>
+                <nav class="nav">
+                    <ul>
+                        <li><a href="#">Главная</a></li>
+                        <li><a href="#products">Товары</a></li>
+                        <li><a href="#about">О нас</a></li>
+                        <li><a href="#contact">Контакты</a></li>
+                    </ul>
+                </nav>
+                <div class="cart-icon">
+                    <button id="cart-btn">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span id="cart-count">0</span>
+                    </button>
+                </div>
             </div>
         </div>
     </header>
 
+    <!-- Основной контент -->
     <main class="main">
-        <section class="hero" id="home">
-            <div class="container">
-                <h2>Добро пожаловать в ТехноМаркет!</h2>
-                <p>Лучшая техника по доступным ценам с гарантией качества</p>
-            </div>
-        </section>
-
+        <!-- Каталог товаров -->
         <section class="products" id="products">
             <div class="container">
-                <h2>Наши товары</h2>
-                <div class="products-grid" id="products-grid">
-                    <!-- Товары загружаются через JavaScript -->
+                <h2 class="section-title">Каталог товаров</h2>
+                <div class="products-grid" id="products-container">
+                    <!-- Товары будут вставлены через JavaScript -->
                 </div>
             </div>
         </section>
 
-        <section class="about" id="about">
+        <!-- Корзина (скрытая по умолчанию) -->
+        <section class="cart-section" id="cart-section">
             <div class="container">
-                <h2>О нашем магазине</h2>
-                <p>Мы работаем на рынке уже более 10 лет, предлагая только качественную технику от проверенных производителей. Гарантия на все товары, быстрая доставка и профессиональная консультация.</p>
+                <div class="cart-header">
+                    <h2>Корзина</h2>
+                    <button id="close-cart">&times;</button>
+                </div>
+                <div class="cart-items" id="cart-items">
+                    <!-- Товары в корзине будут вставлены через JavaScript -->
+                    <p class="empty-cart" id="empty-cart">Корзина пуста</p>
+                </div>
+                <div class="cart-total">
+                    <p>Итого: <span id="total-price">0</span> ₽</p>
+                </div>
+                <button class="btn checkout-btn" id="checkout-btn">Оформить заказ</button>
+            </div>
+        </section>
+
+        <!-- Форма заказа (скрытая по умолчанию) -->
+        <section class="order-form-section" id="order-form-section">
+            <div class="container">
+                <div class="form-header">
+                    <h2>Оформление заказа</h2>
+                    <button id="close-form">&times;</button>
+                </div>
+                <form id="order-form">
+                    <div class="form-group">
+                        <label for="first-name">Имя *</label>
+                        <input type="text" id="first-name" name="first-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="last-name">Фамилия *</label>
+                        <input type="text" id="last-name" name="last-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="address">Адрес доставки *</label>
+                        <textarea id="address" name="address" rows="3" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Контактный телефон *</label>
+                        <input type="tel" id="phone" name="phone" required>
+                    </div>
+                    <button type="submit" class="btn submit-order">Создать заказ</button>
+                </form>
             </div>
         </section>
     </main>
 
-    <!-- Модальные окна -->
-    <div class="modal" id="cart-modal">
-        <div class="modal-content">
-            <span class="close" id="close-cart">&times;</span>
-            <h2>Ваша корзина</h2>
-            <div class="cart-items" id="cart-items">
-                <!-- Содержимое корзины -->
-            </div>
-            <div class="cart-total">
-                <p>Итого: <span id="total-price">0</span> руб.</p>
-                <button class="btn btn-primary" id="checkout-btn">Оформить заказ</button>
-            </div>
+    <!-- Сообщение об успешном заказе -->
+    <div class="order-success" id="order-success">
+        <div class="success-content">
+            <p>Заказ создан!</p>
         </div>
     </div>
 
-    <div class="modal" id="order-modal">
-        <div class="modal-content">
-            <span class="close" id="close-order">&times;</span>
-            <h2>Оформление заказа</h2>
-            <form id="order-form" class="order-form">
-                <div class="form-group">
-                    <label for="first-name">Имя:</label>
-                    <input type="text" id="first-name" name="first-name" required>
-                </div>
-                <div class="form-group">
-                    <label for="last-name">Фамилия:</label>
-                    <input type="text" id="last-name" name="last-name" required>
-                </div>
-                <div class="form-group">
-                    <label for="address">Адрес доставки:</label>
-                    <textarea id="address" name="address" required></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="phone">Телефон:</label>
-                    <input type="tel" id="phone" name="phone" required>
-                </div>
-                <button type="submit" class="btn btn-primary">Создать заказ</button>
-            </form>
-        </div>
-    </div>
-
-    <div class="modal" id="success-modal">
-        <div class="modal-content">
-            <h2>Заказ создан!</h2>
-            <p>Спасибо за ваш заказ. Мы свяжемся с вами в ближайшее время для подтверждения.</p>
-            <button class="btn btn-primary" id="close-success">OK</button>
-        </div>
-    </div>
-
+    <!-- Футер -->
     <footer class="footer">
         <div class="container">
-            <p>&copy; 2023 ТехноМаркет. Все права защищены.</p>
+            <p>&copy; 2023 GLab Beauty. Все права защищены.</p>
         </div>
     </footer>
 
     <script src="script.js"></script>
 </body>
 </html>
+
