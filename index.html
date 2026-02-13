@@ -2,123 +2,116 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KRLKVA Beauty - Магазин косметики</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>2048 — минималистичная игра</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Шапка -->
-    <header class="header">
-        <div class="container">
-            <div class="header-content">
-                <div class="logo">
-                    <h1><a href="#">KRLKVA.Beauty</a></h1>
+    <div id="main-container">
+        <!-- Шапка с очками -->
+        <div class="game-header">
+            <h1>2048</h1>
+            <div class="scores">
+                <div class="scores__item">
+                    <span class="scores__label">Счёт</span>
+                    <span class="scores__value" id="current-score">0</span>
                 </div>
-                <div class="lab-title">
-                    <span>web programming lab 1</span>
-                </div>
-                <div class="header-icons">
-                    <button class="icon-btn" id="cart-btn">
-                        <i class="fas fa-shopping-bag"></i>
-                        <span id="cart-count">0</span>
-                    </button>
+                <div class="scores__item">
+                    <span class="scores__label">Рекорд</span>
+                    <span class="scores__value" id="best-score">0</span>
                 </div>
             </div>
         </div>
-    </header>
 
-    <!-- Основной контент -->
-    <main class="main">
-        <!-- Каталог товаров -->
-        <section class="products" id="products">
-            <div class="container">
-                <div class="products-header">
-                    <h2 class="section-title">КАТАЛОГ</h2>
-                </div>
+        <!-- Игровое поле -->
+        <div class="gameboard"></div>
+
+        <!-- Панель управления (как на макете ToDo) -->
+        <div class="settings">
+            <button class="btn reset-btn" title="Новая игра">⟲ Начать заново</button>
+            <button class="btn undo-btn disabled" title="Отмена">↩ Отмена хода</button>
+            <button class="btn leaderboard-btn" title="Таблица лидеров">🏆 Лидеры</button>
+            <button class="btn speed-control-btn" title="Скорость">
+                <span>⚡</span> <span>x1</span>
+            </button>
+        </div>
+
+        <!-- Виртуальные кнопки для мобильных -->
+        <div class="controls mobile-only">
+            <div class="controls__row">
+                <button class="controls__arrow" data-direction="up">▲</button>
+            </div>
+            <div class="controls__row">
+                <button class="controls__arrow" data-direction="left">◀</button>
+                <button class="controls__arrow" data-direction="down">▼</button>
+                <button class="controls__arrow" data-direction="right">▶</button>
+            </div>
+        </div>
+
+        <!-- Модальное окно окончания игры -->
+        <div class="victory-wrapper popup hidden">
+            <div class="victory popup__content">
+                <h2>🎮 Игра завершена</h2>
+                <h3 id="victory-score">Вы набрали 0 очков</h3>
                 
-                <div class="products-grid" id="products-container">
-                    <!-- Товары будут вставлены через JavaScript -->
-                </div>
-            </div>
-        </section>
-
-        <!-- Корзина (скрытая по умолчанию) -->
-        <aside class="cart-sidebar" id="cart-sidebar">
-            <div class="cart-header">
-                <h3>КОРЗИНА</h3>
-                <button class="close-btn" id="close-cart">&times;</button>
-            </div>
-            <div class="cart-content">
-                <div class="cart-items" id="cart-items">
-                    <p class="empty-cart" id="empty-cart">Ваша корзина пуста</p>
-                </div>
-                <div class="cart-footer">
-                    <div class="cart-total">
-                        <span>СУММА</span>
-                        <span id="total-price">0 ₽</span>
-                    </div>
-                    <button class="btn checkout-btn" id="checkout-btn">ОФОРМИТЬ</button>
-                </div>
-            </div>
-        </aside>
-
-        <!-- Форма заказа (модальное окно) -->
-        <div class="modal-overlay" id="modal-overlay">
-            <div class="modal" id="order-modal">
-                <div class="modal-header">
-                    <h3>ОФОРМЛЕНИЕ ЗАКАЗА</h3>
-                    <button class="close-btn" id="close-form">&times;</button>
-                </div>
-                <form id="order-form">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="first-name">ИМЯ *</label>
-                            <input type="text" id="first-name" name="first-name" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="last-name">ФАМИЛИЯ *</label>
-                            <input type="text" id="last-name" name="last-name" required>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="address">АДРЕСС ДОСТАВКИ *</label>
-                        <textarea id="address" name="address" rows="3" required></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="phone">НОМЕР ТЕЛЕФОНА *</label>
-                        <input type="tel" id="phone" name="phone" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="email">EMAIL</label>
-                        <input type="email" id="email" name="email">
-                    </div>
-                    <button type="submit" class="btn submit-order">ОФОРМИТЬ ЗАКАЗ</button>
+                <div class="victory__title-record hidden">⭐ Новый рекорд!</div>
+                <div class="victory__title-best hidden">🏆 Абсолютный рекорд!</div>
+                <div class="victory__title-save">💾 Сохранить результат?</div>
+                
+                <form id="victory-form">
+                    <input type="text" id="player-name" placeholder="Ваше имя" maxlength="20" autocomplete="off">
+                    <button type="submit" class="btn">✓ Сохранить</button>
                 </form>
+                
+                <div class="victory__title-confirm hidden">✅ Ваш рекорд сохранён</div>
+                <div class="victory__gif hidden">🏅</div>
+                
+                <button class="btn victory__reset">⟲ Начать заново</button>
+                <button class="close-btn">✕</button>
             </div>
         </div>
-    </main>
 
-    <!-- Сообщение об успешном заказе -->
-    <div class="notification" id="order-success">
-        <div class="notification-content">
-            <i class="fas fa-check"></i>
-            <span>ЗАКАЗ СОЗДАН!</span>
+        <!-- Модальное окно таблицы лидеров -->
+        <div class="leaderboard-wrapper popup hidden">
+            <div class="leaderboard popup__content">
+                <h2>🏆 Топ-10 рекордов</h2>
+                <ol class="leaderboard__list"></ol>
+                <button class="close-btn">✕ Закрыть</button>
+            </div>
         </div>
+
+        <!-- Модальное окно настроек скорости -->
+        <div class="speed-wrapper popup hidden">
+            <div class="speed-control popup__content">
+                <h3>Скорость анимации</h3>
+                <div class="speed-control__slider">
+                    <input type="range" min="0" max="7" value="3" step="1">
+                    <div class="speed-control__markers">
+                        <span>0.25x</span>
+                        <span>0.5x</span>
+                        <span>0.75x</span>
+                        <span>1x</span>
+                        <span>2x</span>
+                        <span>3x</span>
+                        <span>5x</span>
+                        <span>10x</span>
+                    </div>
+                </div>
+                <button class="close-btn">✕ Закрыть</button>
+            </div>
+        </div>
+
+        <!-- Секретная кнопка сброса -->
+        <button class="nuke hidden">💣</button>
     </div>
 
-    <!-- Футер -->
+    <!-- Подпись с ФИО и группой -->
     <footer class="footer">
-        <div class="container">
-            <div class="footer-bottom">
-                <p>&copy; 2025 KRLKVA.Beauty | Web Programming Lab 1</p>
-            </div>
-        </div>
+        Анастасия Зайцева | Группа P3212 | 
+        <a href="#" target="_blank">Видеодемо</a> | 
+        <a href="#" target="_blank">Репозиторий</a>
     </footer>
 
     <script src="script.js"></script>
 </body>
 </html>
-
-
