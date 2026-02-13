@@ -2,91 +2,126 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>2048 — минималистичная игра</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plida's cool 2048 game</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="main-container">
-        <!-- Шапка с очками -->
-        <div class="game-header">
-            <h1>2048</h1>
-            <div class="scores">
-                <div class="scores__item">
-                    <span class="scores__label">Счёт</span>
-                    <span class="scores__value" id="current-score">0</span>
+    <div class="game-wrapper">
+        <!-- Шапка -->
+        <div class="header">
+            <div class="title-section">
+                <h1>Plida's cool 2048 game</h1>
+                <p class="subtitle">Web programming lab work #3</p>
+            </div>
+            <div class="yipee">YIPEE</div>
+        </div>
+
+        <!-- Счётчики -->
+        <div class="score-panel">
+            <div class="score-box">
+                <span class="score-label">Score</span>
+                <span class="score-value" id="score-display">0</span>
+            </div>
+            <div class="score-box">
+                <span class="score-label">Best</span>
+                <span class="score-value" id="best-display">0</span>
+            </div>
+        </div>
+
+        <!-- Игровое поле 4x4 -->
+        <div class="board" id="board">
+            <!-- Ячейки будут созданы через JS -->
+        </div>
+
+        <!-- Кнопки управления (чекбоксы) -->
+        <div class="controls">
+            <label class="checkbox-item">
+                <input type="checkbox" id="new-game">
+                <span class="checkbox-custom"></span>
+                Начать заново
+            </label>
+            <label class="checkbox-item">
+                <input type="checkbox" id="undo-move" disabled>
+                <span class="checkbox-custom"></span>
+                Отмена хода
+            </label>
+            <label class="checkbox-item">
+                <input type="checkbox" id="show-leaders">
+                <span class="checkbox-custom"></span>
+                Лидеры
+            </label>
+            <label class="checkbox-item">
+                <input type="checkbox" id="speed-control">
+                <span class="checkbox-custom"></span>
+                <span class="speed-text" id="speed-display">x1</span>
+            </label>
+        </div>
+
+        <!-- Модалка завершения игры -->
+        <div class="modal-overlay" id="gameover-modal">
+            <div class="modal">
+                <h2>Игра завершена</h2>
+                <h3 id="final-score">Вы набрали 0 очков</h3>
+                
+                <div class="checkbox-group">
+                    <label class="checkbox-item">
+                        <input type="checkbox" checked disabled>
+                        <span class="checkbox-custom"></span>
+                        Новый рекорд!
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" disabled>
+                        <span class="checkbox-custom"></span>
+                        Абсолютный рекорд!
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" id="save-checkbox">
+                        <span class="checkbox-custom"></span>
+                        Сохранить результат?
+                    </label>
                 </div>
-                <div class="scores__item">
-                    <span class="scores__label">Рекорд</span>
-                    <span class="scores__value" id="best-score">0</span>
+
+                <div class="name-input-area" id="name-area">
+                    <span>Ваше имя</span>
+                    <input type="text" id="player-name" placeholder="user" maxlength="20">
+                    <button class="save-btn" id="save-btn">Сохранить</button>
                 </div>
+
+                <div class="checkbox-item saved-confirm" id="saved-confirm">
+                    <input type="checkbox" checked disabled>
+                    <span class="checkbox-custom"></span>
+                    Ваш рекорд сохранён
+                </div>
+
+                <label class="checkbox-item restart-item">
+                    <input type="checkbox" id="restart-game">
+                    <span class="checkbox-custom"></span>
+                    Начать заново
+                </label>
             </div>
         </div>
 
-        <!-- Игровое поле -->
-        <div class="gameboard"></div>
-
-        <!-- Панель управления (как на макете ToDo) -->
-        <div class="settings">
-            <button class="btn reset-btn" title="Новая игра">⟲ Начать заново</button>
-            <button class="btn undo-btn disabled" title="Отмена">↩ Отмена хода</button>
-            <button class="btn leaderboard-btn" title="Таблица лидеров">🏆 Лидеры</button>
-            <button class="btn speed-control-btn" title="Скорость">
-                <span>⚡</span> <span>x1</span>
-            </button>
-        </div>
-
-        <!-- Виртуальные кнопки для мобильных -->
-        <div class="controls mobile-only">
-            <div class="controls__row">
-                <button class="controls__arrow" data-direction="up">▲</button>
-            </div>
-            <div class="controls__row">
-                <button class="controls__arrow" data-direction="left">◀</button>
-                <button class="controls__arrow" data-direction="down">▼</button>
-                <button class="controls__arrow" data-direction="right">▶</button>
+        <!-- Модалка лидеров -->
+        <div class="modal-overlay" id="leaderboard-modal">
+            <div class="modal leaderboard-modal">
+                <h2>Топ-10 рекордов</h2>
+                <ol id="leaderboard-list"></ol>
+                <label class="checkbox-item">
+                    <input type="checkbox" id="close-leaderboard">
+                    <span class="checkbox-custom"></span>
+                    Закрыть
+                </label>
             </div>
         </div>
 
-        <!-- Модальное окно окончания игры -->
-        <div class="victory-wrapper popup hidden">
-            <div class="victory popup__content">
-                <h2>🎮 Игра завершена</h2>
-                <h3 id="victory-score">Вы набрали 0 очков</h3>
-                
-                <div class="victory__title-record hidden">⭐ Новый рекорд!</div>
-                <div class="victory__title-best hidden">🏆 Абсолютный рекорд!</div>
-                <div class="victory__title-save">💾 Сохранить результат?</div>
-                
-                <form id="victory-form">
-                    <input type="text" id="player-name" placeholder="Ваше имя" maxlength="20" autocomplete="off">
-                    <button type="submit" class="btn">✓ Сохранить</button>
-                </form>
-                
-                <div class="victory__title-confirm hidden">✅ Ваш рекорд сохранён</div>
-                <div class="victory__gif hidden">🏅</div>
-                
-                <button class="btn victory__reset">⟲ Начать заново</button>
-                <button class="close-btn">✕</button>
-            </div>
-        </div>
-
-        <!-- Модальное окно таблицы лидеров -->
-        <div class="leaderboard-wrapper popup hidden">
-            <div class="leaderboard popup__content">
-                <h2>🏆 Топ-10 рекордов</h2>
-                <ol class="leaderboard__list"></ol>
-                <button class="close-btn">✕ Закрыть</button>
-            </div>
-        </div>
-
-        <!-- Модальное окно настроек скорости -->
-        <div class="speed-wrapper popup hidden">
-            <div class="speed-control popup__content">
+        <!-- Модалка скорости -->
+        <div class="modal-overlay" id="speed-modal">
+            <div class="modal speed-modal">
                 <h3>Скорость анимации</h3>
-                <div class="speed-control__slider">
-                    <input type="range" min="0" max="7" value="3" step="1">
-                    <div class="speed-control__markers">
+                <div class="speed-slider-wrapper">
+                    <input type="range" min="0" max="7" value="3" step="1" id="speed-slider">
+                    <div class="speed-markers">
                         <span>0.25x</span>
                         <span>0.5x</span>
                         <span>0.75x</span>
@@ -97,19 +132,29 @@
                         <span>10x</span>
                     </div>
                 </div>
-                <button class="close-btn">✕ Закрыть</button>
+                <label class="checkbox-item">
+                    <input type="checkbox" id="close-speed">
+                    <span class="checkbox-custom"></span>
+                    Закрыть
+                </label>
             </div>
         </div>
 
-        <!-- Секретная кнопка сброса -->
-        <button class="nuke hidden">💣</button>
+        <!-- Мобильные кнопки -->
+        <div class="mobile-controls">
+            <button class="mobile-btn" data-dir="up">▲</button>
+            <div class="mobile-row">
+                <button class="mobile-btn" data-dir="left">◀</button>
+                <button class="mobile-btn" data-dir="down">▼</button>
+                <button class="mobile-btn" data-dir="right">▶</button>
+            </div>
+        </div>
+
+        <!-- Подпись -->
+        <div class="footer">
+            Королькова Елизавета | Web Programming Lab 3
+        </div>
     </div>
-
-    <footer class="footer">
-        Королькова Елизавета | Web Programming Lab 3 | 
-    </footer>
-
     <script src="script.js"></script>
 </body>
 </html>
-
