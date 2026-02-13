@@ -1,0 +1,425 @@
+// ============ ПЕРЕМЕННЫЕ ============
+$grid-gap: 12px;
+$border-radius: 20px;
+$border-radius-sm: 14px;
+$border-radius-lg: 40px;
+
+$color-bg: #f6f8fa;
+$color-surface: white;
+$color-border: #e9edf2;
+$color-border-strong: #dae0e6;
+$color-text: #1e293b;
+$color-text-soft: #617b8b;
+$color-accent: #0b1c2e;
+$color-btn-hover: #f0f4fa;
+
+$shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.02);
+$shadow-inset: inset 0 2px 6px rgba(0, 0, 0, 0.02);
+
+$breakpoint-mobile: 640px;
+$breakpoint-small: 480px;
+
+// ============ ГЛОБАЛЬНЫЕ СТИЛИ ============
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, sans-serif;
+    background: $color-bg;
+    color: $color-text;
+    line-height: 1.5;
+    padding: 20px 16px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    
+    &.stop-scrolling {
+        overflow: hidden;
+    }
+}
+
+#main-container {
+    max-width: 620px;
+    width: 100%;
+    background: $color-surface;
+    border-radius: $border-radius-lg;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    padding: 28px 24px;
+    border: 1px solid $color-border;
+    position: relative;
+}
+
+// ============ ЗАГОЛОВОК И ОЧКИ ============
+.game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 28px;
+    
+    h1 {
+        font-size: 28px;
+        font-weight: 500;
+        letter-spacing: -0.5px;
+        color: $color-accent;
+    }
+}
+
+.scores {
+    display: flex;
+    gap: 16px;
+    
+    &__item {
+        background: #eef2f6;
+        padding: 8px 18px;
+        border-radius: $border-radius-lg;
+        border: 1px solid $color-border-strong;
+        box-shadow: inset 0 1px 2px white;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    &__label {
+        font-size: 12px;
+        color: $color-text-soft;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    &__value {
+        font-size: 22px;
+        font-weight: 600;
+        color: $color-accent;
+    }
+}
+
+// ============ ИГРОВОЕ ПОЛЕ ============
+.gameboard {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: $grid-gap;
+    background: #d6dfe6;
+    padding: $grid-gap;
+    border-radius: $border-radius;
+    box-shadow: $shadow-inset;
+    margin-bottom: 20px;
+    aspect-ratio: 1 / 1;
+    
+    &__tile-wrapper {
+        aspect-ratio: 1 / 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    &__tile {
+        width: 100%;
+        height: 100%;
+        background-color: #f2f5f8;
+        border-radius: $border-radius-sm;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.25rem;
+        font-weight: 600;
+        color: $color-text;
+        box-shadow: $shadow-sm;
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        transition: background 0.1s ease;
+        will-change: transform;
+        
+        &.active-tile {
+            // Цвет задаётся динамически через JS
+        }
+        
+        &.active-tile-combined {
+            z-index: 10;
+        }
+    }
+}
+
+// ============ КНОПКИ ============
+.btn {
+    background: white;
+    border: 1px solid #d2dce5;
+    padding: 10px 20px;
+    border-radius: $border-radius-lg;
+    font-size: 15px;
+    font-weight: 500;
+    color: #1f3a4f;
+    cursor: pointer;
+    transition: 0.1s;
+    box-shadow: $shadow-sm;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    
+    &:hover {
+        background: $color-btn-hover;
+        border-color: #b3c4d1;
+    }
+    
+    &:active {
+        transform: translateY(1px);
+    }
+    
+    &.disabled {
+        opacity: 0.5;
+        pointer-events: none;
+        cursor: not-allowed;
+    }
+}
+
+.settings {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+
+// ============ МОБИЛЬНОЕ УПРАВЛЕНИЕ ============
+.controls {
+    display: none;
+    margin-top: 20px;
+    
+    &__row {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        margin-bottom: 8px;
+    }
+    
+    &__arrow {
+        @extend .btn;
+        aspect-ratio: 1 / 1;
+        padding: 16px;
+        font-size: 24px;
+        line-height: 1;
+        width: 70px;
+        justify-content: center;
+    }
+}
+
+@media (max-width: $breakpoint-mobile) {
+    .mobile-only {
+        display: block;
+    }
+}
+
+// ============ ПОПАПЫ (МОДАЛЬНЫЕ ОКНА) ============
+.popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    
+    &.hidden {
+        display: none;
+    }
+    
+    &__content {
+        background: white;
+        border-radius: $border-radius-lg;
+        padding: 32px;
+        max-width: 480px;
+        width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+        position: relative;
+        border: 1px solid $color-border;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+    }
+}
+
+.close-btn {
+    position: absolute;
+    top: 16px;
+    right: 20px;
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: $color-text-soft;
+    padding: 8px;
+    
+    &:hover {
+        color: $color-text;
+    }
+}
+
+// ============ ОКНО ПОБЕДЫ/ПОРАЖЕНИЯ ============
+.victory {
+    text-align: center;
+    
+    h2 {
+        margin-bottom: 16px;
+        color: $color-accent;
+    }
+    
+    h3 {
+        margin-bottom: 20px;
+        font-weight: 400;
+        color: $color-text-soft;
+    }
+    
+    form {
+        display: flex;
+        gap: 12px;
+        margin: 20px 0;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    input {
+        flex: 1 1 200px;
+        padding: 12px 18px;
+        border: 1px solid #cbd5e1;
+        border-radius: $border-radius-lg;
+        font-size: 15px;
+        
+        &:focus {
+            outline: none;
+            border-color: #8aa1b2;
+        }
+    }
+    
+    &__gif {
+        font-size: 48px;
+        margin: 10px 0;
+    }
+    
+    &__title-record,
+    &__title-best,
+    &__title-save,
+    &__title-confirm {
+        margin: 12px 0;
+        font-weight: 500;
+    }
+    
+    &__title-record { color: #c97d2d; }
+    &__title-best { color: #b3442c; }
+    &__title-save { color: #2b6e4e; }
+    &__title-confirm { color: #2b6e4e; }
+    
+    .victory__reset {
+        margin-top: 16px;
+    }
+}
+
+// ============ ТАБЛИЦА ЛИДЕРОВ ============
+.leaderboard {
+    h2 {
+        margin-bottom: 24px;
+        color: $color-accent;
+    }
+    
+    &__list {
+        list-style: none;
+        margin-bottom: 24px;
+        
+        li {
+            padding: 12px 16px;
+            border-bottom: 1px solid #ecf0f4;
+            display: flex;
+            justify-content: space-between;
+            font-size: 16px;
+            
+            &:first-child {
+                font-weight: 600;
+                background: #f6f8fa;
+                border-radius: $border-radius-sm $border-radius-sm 0 0;
+            }
+            
+            &:last-child {
+                border-bottom: none;
+            }
+        }
+    }
+}
+
+// ================= УПРАВЛЕНИЕ СКОРОСТЬЮ ============
+.speed-control {
+    &__slider {
+        margin: 30px 0;
+        position: relative;
+        
+        input {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+    }
+    
+    &__markers {
+        display: flex;
+        justify-content: space-between;
+        font-size: 11px;
+        color: $color-text-soft;
+    }
+}
+
+// ============ ПОДВАЛ ============
+.footer {
+    margin-top: 20px;
+    font-size: 13px;
+    color: $color-text-soft;
+    text-align: center;
+    
+    a {
+        color: $color-accent;
+        text-decoration: none;
+        
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+}
+
+// ============ АДАПТИВНОСТЬ ============
+@media (max-width: $breakpoint-mobile) {
+    #main-container {
+        padding: 20px 16px;
+    }
+    
+    .gameboard__tile {
+        font-size: 2rem !important;
+    }
+    
+    .scores__value {
+        font-size: 20px;
+    }
+}
+
+@media (max-width: $breakpoint-small) {
+    .gameboard {
+        gap: 8px;
+        padding: 8px;
+    }
+    
+    .gameboard__tile {
+        font-size: 1.75rem !important;
+    }
+    
+    .btn {
+        padding: 8px 16px;
+    }
+    
+    .settings {
+        gap: 8px;
+    }
+}
+
+// ============ УТИЛИТЫ ============
+.hidden {
+    display: none !important;
+}
