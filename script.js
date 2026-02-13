@@ -71,8 +71,6 @@ function updateBoard() {
             const value = board[i][j];
             tile.setAttribute('data-value', value);
             tile.textContent = value || '';
-            
-            // Цвет через data-value уже в CSS
         }
     }
     scoreDisplay.textContent = score;
@@ -104,81 +102,139 @@ function addRandomTile() {
     return true;
 }
 
-// ===== ДВИЖЕНИЕ И СЛИЯНИЕ =====
-function moveRowLeft(row) {
-    let newRow = row.filter(v => v !== 0);
+// ===== ИСПРАВЛЕННАЯ ЛОГИКА ДВИЖЕНИЯ =====
+/**
+ * Обрабатывает одну строку/столбец для движения влево
+ * @param {number[]} line - массив из 4 чисел
+ * @returns {Object} - новая строка и полученные очки
+ */
+function processLineLeft(line) {
+    // Убираем нули
+    const filtered = line.filter(val => val !== 0);
+    const result = [];
     let scoreGain = 0;
     
-    for (let i = 0; i < newRow.length - 1; i++) {
-        if (newRow[i] === newRow[i + 1]) {
-            newRow[i] *= 2;
-            scoreGain += newRow[i];
-            newRow.splice(i + 1, 1);
+    for (let i = 0; i < filtered.length; i++) {
+        if (i < filtered.length - 1 && filtered[i] === filtered[i + 1]) {
+            // Слияние
+            result.push(filtered[i] * 2);
+            scoreGain += filtered[i] * 2;
+            i++; // Пропускаем следующий элемент
+        } else {
+            result.push(filtered[i]);
         }
     }
     
-    while (newRow.length < 4) newRow.push(0);
-    return { newRow, scoreGain };
+    // Дополняем нулями до 4 элементов
+    while (result.length < 4) {
+        result.push(0);
+    }
+    
+    return { newLine: result, scoreGain };
 }
 
+/**
+ * Обрабатывает одну строку/столбец для движения вправо
+ * @param {number[]} line - массив из 4 чисел
+ * @returns {Object} - новая строка и полученные очки
+ */
+function processLineRight(line) {
+    // Для движения вправо разворачиваем, обрабатываем как влево, потом разворачиваем обратно
+    const reversed = [...line].reverse();
+    const { newLine: processedReversed, scoreGain } = processLineLeft(reversed);
+    const newLine = processedReversed.reverse();
+    return { newLine, scoreGain };
+}
+
+// ===== ДВИЖЕНИЕ ВЛЕВО =====
 function moveLeft() {
     let moved = false;
     let totalGain = 0;
     
     for (let i = 0; i < 4; i++) {
-        const original = [...board[i]];
-        const { newRow, scoreGain } = moveRowLeft(board[i]);
-        if (newRow.some((val, idx) => val !== original[idx])) moved = true;
-        board[i] = newRow;
+        const originalRow = [...board[i]];
+        const { newLine, scoreGain } = processLineLeft(originalRow);
+        
+        // Проверяем, изменилась ли строка
+        if (newLine.some((val, idx) => val !== originalRow[idx])) {
+            moved = true;
+        }
+        
+        board[i] = newLine;
         totalGain += scoreGain;
     }
     
     return { moved, scoreGain: totalGain };
 }
 
+// ===== ДВИЖЕНИЕ ВПРАВО (ИСПРАВЛЕНО) =====
 function moveRight() {
     let moved = false;
     let totalGain = 0;
     
     for (let i = 0; i < 4; i++) {
-        const original = [...board[i]];
-        const reversed = board[i].reverse();
-        const { newRow, scoreGain } = moveRowLeft(reversed);
-        if (newRow.reverse().some((val, idx) => val !== original[idx])) moved = true;
-        board[i] = newRow.reverse();
+        const originalRow = [...board[i]];
+        const { newLine, scoreGain } = processLineRight(originalRow);
+        
+        // Проверяем, изменилась ли строка
+        if (newLine.some((val, idx) => val !== originalRow[idx])) {
+            moved = true;
+        }
+        
+        board[i] = newLine;
         totalGain += scoreGain;
     }
     
     return { moved, scoreGain: totalGain };
 }
 
+// ===== ДВИЖЕНИЕ ВВЕРХ =====
 function moveUp() {
     let moved = false;
     let totalGain = 0;
     
     for (let j = 0; j < 4; j++) {
+        // Собираем столбец
         const column = [board[0][j], board[1][j], board[2][j], board[3][j]];
-        const original = [...column];
-        const { newRow, scoreGain } = moveRowLeft(column);
-        if (newRow.some((val, idx) => val !== original[idx])) moved = true;
-        for (let i = 0; i < 4; i++) board[i][j] = newRow[i];
+        const originalCol = [...column];
+        const { newLine, scoreGain } = processLineLeft(column);
+        
+        // Проверяем, изменился ли столбец
+        if (newLine.some((val, idx) => val !== originalCol[idx])) {
+            moved = true;
+        }
+        
+        // Записываем обратно
+        for (let i = 0; i < 4; i++) {
+            board[i][j] = newLine[i];
+        }
         totalGain += scoreGain;
     }
     
     return { moved, scoreGain: totalGain };
 }
 
+// ===== ДВИЖЕНИЕ ВНИЗ =====
 function moveDown() {
     let moved = false;
     let totalGain = 0;
     
     for (let j = 0; j < 4; j++) {
+        // Собираем столбец (снизу вверх для обработки)
         const column = [board[3][j], board[2][j], board[1][j], board[0][j]];
-        const original = [...column];
-        const { newRow, scoreGain } = moveRowLeft(column);
-        if (newRow.some((val, idx) => val !== original[idx])) moved = true;
-        const result = newRow.reverse();
-        for (let i = 0; i < 4; i++) board[i][j] = result[i];
+        const originalCol = [...column];
+        const { newLine, scoreGain } = processLineLeft(column);
+        
+        // Проверяем, изменился ли столбец
+        if (newLine.some((val, idx) => val !== originalCol[idx])) {
+            moved = true;
+        }
+        
+        // Записываем обратно (разворачиваем)
+        const result = newLine.reverse();
+        for (let i = 0; i < 4; i++) {
+            board[i][j] = result[i];
+        }
         totalGain += scoreGain;
     }
     
@@ -187,13 +243,27 @@ function moveDown() {
 
 // ===== ПРОВЕРКА НАЛИЧИЯ ХОДОВ =====
 function canMove() {
+    // Проверяем пустые клетки
     for (let i = 0; i < 4; i++) {
         for (let j = 0; j < 4; j++) {
             if (board[i][j] === 0) return true;
-            if (j < 3 && board[i][j] === board[i][j+1]) return true;
-            if (i < 3 && board[i][j] === board[i+1][j]) return true;
         }
     }
+    
+    // Проверяем возможные слияния по горизонтали
+    for (let i = 0; i < 4; i++) {
+        for (let j = 0; j < 3; j++) {
+            if (board[i][j] === board[i][j+1]) return true;
+        }
+    }
+    
+    // Проверяем возможные слияния по вертикали
+    for (let j = 0; j < 4; j++) {
+        for (let i = 0; i < 3; i++) {
+            if (board[i][j] === board[i+1][j]) return true;
+        }
+    }
+    
     return false;
 }
 
@@ -201,40 +271,57 @@ function canMove() {
 function makeMove(direction) {
     if (gameOver || boardPaused) return;
     
-    // Сохраняем предыдущее состояние
+    // Сохраняем предыдущее состояние для Undo
     previousBoard = JSON.parse(JSON.stringify(board));
     previousScore = score;
     
     let result;
     switch(direction) {
-        case 'left': result = moveLeft(); break;
-        case 'right': result = moveRight(); break;
-        case 'up': result = moveUp(); break;
-        case 'down': result = moveDown(); break;
+        case 'left': 
+            result = moveLeft(); 
+            break;
+        case 'right': 
+            result = moveRight(); 
+            break;
+        case 'up': 
+            result = moveUp(); 
+            break;
+        case 'down': 
+            result = moveDown(); 
+            break;
+        default: return;
     }
     
-    if (result.moved) {
-        score += result.scoreGain;
+    // Если движение не привело к изменениям, ничего не делаем
+    if (!result.moved) {
+        return;
+    }
+    
+    // Обновляем счёт
+    score += result.scoreGain;
+    updateBoard();
+    
+    // Анимация слияния
+    tiles.forEach(t => t.classList.add('tile-merge'));
+    setTimeout(() => tiles.forEach(t => t.classList.remove('tile-merge')), 150);
+    
+    // Блокируем до окончания анимации
+    boardPaused = true;
+    
+    setTimeout(() => {
+        // Добавляем новую плитку
+        addRandomTile();
         updateBoard();
         
-        // Анимация слияния для всех плиток (упрощённо)
-        tiles.forEach(t => t.classList.add('tile-merge'));
-        setTimeout(() => tiles.forEach(t => t.classList.remove('tile-merge')), 150);
+        // Проверяем, не закончилась ли игра
+        if (!canMove()) {
+            gameOver = true;
+            showGameOver();
+        }
         
-        boardPaused = true;
-        setTimeout(() => {
-            addRandomTile();
-            updateBoard();
-            
-            if (!canMove()) {
-                gameOver = true;
-                showGameOver();
-            }
-            
-            boardPaused = false;
-            undoCheck.disabled = false;
-        }, animationSpeed);
-    }
+        boardPaused = false;
+        undoCheck.disabled = false;
+    }, animationSpeed);
 }
 
 // ===== ПОКАЗ ОКНА ЗАВЕРШЕНИЯ =====
@@ -264,7 +351,8 @@ function saveLeaderboard() {
 
 function isNewRecord(score) {
     if (leaderboard.length < 10) return true;
-    return score > leaderboard[leaderboard.length-1].score;
+    leaderboard.sort((a, b) => b.score - a.score);
+    return score > leaderboard[leaderboard.length - 1].score;
 }
 
 function addToLeaderboard(name, score) {
@@ -273,7 +361,7 @@ function addToLeaderboard(name, score) {
         score: score,
         date: new Date().toLocaleDateString('ru-RU')
     });
-    leaderboard.sort((a,b) => b.score - a.score);
+    leaderboard.sort((a, b) => b.score - a.score);
     if (leaderboard.length > 10) leaderboard.pop();
     saveLeaderboard();
     renderLeaderboard();
@@ -316,6 +404,7 @@ function undo() {
     score = previousScore;
     updateBoard();
     undoCheck.disabled = true;
+    previousBoard = []; // Чтобы нельзя было отменить дважды
 }
 
 // ===== ЗАГРУЗКА СОСТОЯНИЯ =====
@@ -337,6 +426,48 @@ function saveGame() {
     localStorage.setItem('2048-board', JSON.stringify(board));
     localStorage.setItem('2048-score', score);
 }
+
+// ===== ТЕСТОВАЯ ФУНКЦИЯ ДЛЯ ПРОВЕРКИ =====
+function testMoves() {
+    console.log("Тестирование движения...");
+    
+    // Тест 1: Движение вправо с [2,2,4,4] должно дать [0,0,4,8]
+    board = [
+        [2,2,4,4],
+        [0,0,0,0],
+        [0,0,0,0],
+        [0,0,0,0]
+    ];
+    console.log("До движения вправо:", board[0]);
+    moveRight();
+    console.log("После движения вправо:", board[0], "Ожидается: [0,0,4,8]");
+    
+    // Тест 2: Движение влево с [2,2,4,4] должно дать [4,8,0,0]
+    board = [
+        [2,2,4,4],
+        [0,0,0,0],
+        [0,0,0,0],
+        [0,0,0,0]
+    ];
+    console.log("До движения влево:", board[0]);
+    moveLeft();
+    console.log("После движения влево:", board[0], "Ожидается: [4,8,0,0]");
+    
+    // Тест 3: Движение вверх с [2,0,0,0; 2,0,0,0; 4,0,0,0; 4,0,0,0] должно дать [4,0,0,0; 8,0,0,0; 0,0,0,0; 0,0,0,0]
+    board = [
+        [2,0,0,0],
+        [2,0,0,0],
+        [4,0,0,0],
+        [4,0,0,0]
+    ];
+    console.log("До движения вверх:");
+    console.log(board.map(row => row[0]));
+    moveUp();
+    console.log("После движения вверх (первый столбец):", [board[0][0], board[1][0], board[2][0], board[3][0]], "Ожидается: [4,8,0,0]");
+}
+
+// Раскомментируйте для теста:
+// testMoves();
 
 // ===== ИНИЦИАЛИЗАЦИЯ =====
 loadLeaderboard();
