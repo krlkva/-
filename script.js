@@ -138,12 +138,20 @@ function animateTile(type, tile, shift = '0, 0') {
             break;
             
         case 'combined':
+            tile.style.zIndex = '101';
             tile.classList.add('tile-merge');
-            setTimeout(() => tile.classList.remove('tile-merge'), animationSpeed);
+            setTimeout(() => {
+                tile.classList.remove('tile-merge');
+                tile.style.zIndex = '';
+            }, animationSpeed);
             break;
             
         case 'moved':
+            // Поднимаем ячейку над другими во время анимации
+            tile.style.zIndex = '100';
+            tile.classList.add('moving');
             tile.style.transformOrigin = 'center center';
+            
             animation = tile.animate(
                 [
                     { transform: 'translate(0, 0)' },
@@ -156,13 +164,14 @@ function animateTile(type, tile, shift = '0, 0') {
                     easing: 'ease-in-out'
                 }
             );
+            
             return animation;
     }
     
     return animation;
 }
 
-// ===== ИСПРАВЛЕННАЯ ЛОГИКА ДВИЖЕНИЯ =====
+// ===== ЛОГИКА ДВИЖЕНИЯ =====
 
 // Движение влево
 function moveTileListLeft(tiles) {
@@ -402,6 +411,16 @@ function collectMovedTiles(direction) {
 function updateBoardSnap(movedTiles) {
     let animations = [];
     
+    // Сначала поднимаем все двигающиеся ячейки
+    for (let tile of movedTiles) {
+        let fromRow = tile[0][0];
+        let fromCol = tile[0][1];
+        let movingTile = visualTiles[fromRow * 4 + fromCol];
+        movingTile.style.zIndex = '100';
+        movingTile.classList.add('moving');
+    }
+    
+    // Запускаем анимацию
     for (let tile of movedTiles) {
         let fromRow = tile[0][0];
         let fromCol = tile[0][1];
@@ -413,14 +432,19 @@ function updateBoardSnap(movedTiles) {
     }
 
     setTimeout(() => {
+        // Отменяем анимации
         for (let animation of animations) {
             if (animation) animation.cancel();
         }
         
+        // Возвращаем всё на место и сбрасываем z-index
         for (let i = 0; i < visualTiles.length; i++) {
             visualTiles[i].style.transform = '';
+            visualTiles[i].style.zIndex = '';
+            visualTiles[i].classList.remove('moving');
         }
         
+        // Обновляем игровое поле
         for (let tile of movedTiles) {
             let oldTile = gameBoard[tile[0][0]][tile[0][1]];
             let newTile = gameBoard[tile[1][0]][tile[1][1]];
@@ -433,6 +457,7 @@ function updateBoardSnap(movedTiles) {
                 gameBoard[tile[1][0]][tile[1][1]] = oldTile * 2;
                 updateScore(oldTile * 2);
                 
+                // Анимация слияния
                 let visualTile = visualTiles[tile[1][0] * 4 + tile[1][1]];
                 animateTile('combined', visualTile);
                 visualTile.classList.add('active-tile-combined');
