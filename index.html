@@ -2,8 +2,8 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plida's cool 2048 game</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>KRLKVA 2048 game</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,10 +11,9 @@
         <!-- Шапка -->
         <div class="header">
             <div class="title-section">
-                <h1>Plida's cool 2048 game</h1>
-                <p class="subtitle">Web programming lab work #3</p>
+                <h1>KRLKVA 2048 game</h1>
+                <p class="subtitle">Web programming Lab 3</p>
             </div>
-            <div class="yipee">YIPEE</div>
         </div>
 
         <!-- Счётчики -->
@@ -30,95 +29,74 @@
         </div>
 
         <!-- Игровое поле 4x4 -->
-        <div class="board" id="board">
-            <!-- Ячейки будут созданы через JS -->
-        </div>
+        <div class="board" id="board"></div>
 
-        <!-- Кнопки управления (чекбоксы) -->
+        <!-- Панель управления (чекбоксы без квадратиков) -->
         <div class="controls">
             <label class="checkbox-item">
                 <input type="checkbox" id="new-game">
-                <span class="checkbox-custom"></span>
-                Начать заново
+                <span>Начать заново</span>
             </label>
             <label class="checkbox-item">
                 <input type="checkbox" id="undo-move" disabled>
-                <span class="checkbox-custom"></span>
-                Отмена хода
+                <span>Отмена хода</span>
             </label>
             <label class="checkbox-item">
                 <input type="checkbox" id="show-leaders">
-                <span class="checkbox-custom"></span>
-                Лидеры
+                <span>Лидеры</span>
             </label>
             <label class="checkbox-item">
                 <input type="checkbox" id="speed-control">
-                <span class="checkbox-custom"></span>
                 <span class="speed-text" id="speed-display">x1</span>
             </label>
         </div>
 
-        <!-- Модалка завершения игры -->
+        <!-- Модальное окно завершения игры -->
         <div class="modal-overlay" id="gameover-modal">
-            <div class="modal">
-                <h2>Игра завершена</h2>
-                <h3 id="final-score">Вы набрали 0 очков</h3>
+            <div class="modal gameover-modal">
+                <h2>The game is over!</h2>
+                <h3 id="final-score">You scored 0 points.</h3>
                 
-                <div class="checkbox-group">
-                    <label class="checkbox-item">
-                        <input type="checkbox" checked disabled>
-                        <span class="checkbox-custom"></span>
-                        Новый рекорд!
-                    </label>
-                    <label class="checkbox-item">
-                        <input type="checkbox" disabled>
-                        <span class="checkbox-custom"></span>
-                        Абсолютный рекорд!
-                    </label>
-                    <label class="checkbox-item">
-                        <input type="checkbox" id="save-checkbox">
-                        <span class="checkbox-custom"></span>
-                        Сохранить результат?
-                    </label>
+                <div class="record-message" id="record-message">
+                    This is a new record!
                 </div>
-
-                <div class="name-input-area" id="name-area">
-                    <span>Ваше имя</span>
-                    <input type="text" id="player-name" placeholder="user" maxlength="20">
-                    <button class="save-btn" id="save-btn">Сохранить</button>
+                
+                <div class="save-message" id="save-message">
+                    Enter your name to save it to the leaderboard
                 </div>
-
-                <div class="checkbox-item saved-confirm" id="saved-confirm">
-                    <input type="checkbox" checked disabled>
-                    <span class="checkbox-custom"></span>
-                    Ваш рекорд сохранён
+                
+                <div class="congrats-message" id="congrats-message">
+                    Congratulations!
                 </div>
-
+                
+                <div class="name-input-row" id="name-input-row">
+                    <input type="text" id="player-name" placeholder="user" value="user" maxlength="20">
+                    <button class="save-btn" id="save-score-btn">Save</button>
+                </div>
+                
                 <label class="checkbox-item restart-item">
-                    <input type="checkbox" id="restart-game">
-                    <span class="checkbox-custom"></span>
-                    Начать заново
+                    <input type="checkbox" id="restart-checkbox">
+                    <span>Start a new game</span>
                 </label>
             </div>
         </div>
 
-        <!-- Модалка лидеров -->
+        <!-- Модальное окно лидеров -->
         <div class="modal-overlay" id="leaderboard-modal">
             <div class="modal leaderboard-modal">
-                <h2>Топ-10 рекордов</h2>
-                <ol id="leaderboard-list"></ol>
+                <h2>Top-10 leaderboard</h2>
+                <ol class="leaderboard-list" id="leaderboard-list"></ol>
                 <label class="checkbox-item">
                     <input type="checkbox" id="close-leaderboard">
-                    <span class="checkbox-custom"></span>
-                    Закрыть
+                    <span>Close</span>
                 </label>
             </div>
         </div>
 
-        <!-- Модалка скорости -->
+        <!-- Модальное окно скорости -->
         <div class="modal-overlay" id="speed-modal">
             <div class="modal speed-modal">
-                <h3>Скорость анимации</h3>
+                <h3>Animation speed</h3>
                 <div class="speed-slider-wrapper">
                     <input type="range" min="0" max="7" value="3" step="1" id="speed-slider">
                     <div class="speed-markers">
@@ -134,15 +112,16 @@
                 </div>
                 <label class="checkbox-item">
                     <input type="checkbox" id="close-speed">
-                    <span class="checkbox-custom"></span>
-                    Закрыть
+                    <span>Close</span>
                 </label>
             </div>
         </div>
 
-        <!-- Мобильные кнопки -->
+        <!-- Мобильные кнопки управления -->
         <div class="mobile-controls">
-            <button class="mobile-btn" data-dir="up">▲</button>
+            <div class="mobile-row">
+                <button class="mobile-btn" data-dir="up">▲</button>
+            </div>
             <div class="mobile-row">
                 <button class="mobile-btn" data-dir="left">◀</button>
                 <button class="mobile-btn" data-dir="down">▼</button>
