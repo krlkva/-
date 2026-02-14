@@ -73,7 +73,6 @@ function createGameBoard() {
     console.log('Game board created');
 }
 
-// Создаём поле сразу
 createGameBoard();
 const visualTiles = board.querySelectorAll('.gameboard__tile');
 
@@ -108,7 +107,12 @@ function updateBestScore() {
 }
 
 function updateBoardMove(direction) {
-    if (isBoardPaused || gameIsFinished) return;
+    console.log('Moving', direction);
+    
+    if (isBoardPaused || gameIsFinished) {
+        console.log('Cannot move: paused or finished');
+        return;
+    }
     
     // Сохраняем предыдущее состояние перед ходом
     prevGameBoard = JSON.parse(JSON.stringify(gameBoard));
@@ -122,7 +126,10 @@ function updateBoardMove(direction) {
     if (speedControlInput) speedControlInput.disabled = true;
     
     let movedTiles = collectMovedTiles(direction);
+    console.log('Moved tiles:', movedTiles);
+    
     if (movedTiles.length === 0) {
+        console.log('No tiles moved');
         isBoardPaused = false;
         if (speedControlInput) speedControlInput.disabled = false;
         return;
@@ -496,7 +503,10 @@ function updateBoardAdd() {
 
 // ===== ИСПРАВЛЕННАЯ ФУНКЦИЯ UNDO =====
 function undoMove() {
+    console.log('Undo move');
+    
     if (prevGameBoard.length === 0 || gameIsFinished || isBoardPaused) {
+        console.log('Cannot undo');
         return;
     }
     
@@ -767,6 +777,29 @@ function closeSpeedControl(e) {
 }
 
 // ===== ОБРАБОТЧИКИ СОБЫТИЙ =====
+
+// Обработчик для кнопок управления
+for (let btn of controlsBtns) {
+    btn.addEventListener('click', function() {
+        console.log('Button clicked:', this.dataset.direction);
+        updateBoardMove(this.dataset.direction);
+    });
+}
+
+// Обработчик для клавиатуры
+document.addEventListener('keydown', function(e) {
+    if (e.key.startsWith('Arrow')) {
+        e.preventDefault();
+        
+        let direction = e.key.slice(5).toLowerCase();
+        console.log('Key pressed:', direction);
+        
+        if (!gameIsFinished && !isBoardPaused && victoryWrapper.classList.contains('hidden') && leaderboardWrapper.classList.contains('hidden')) {
+            updateBoardMove(direction);
+        }
+    }
+});
+
 undo.addEventListener('click', function(e) {
     e.preventDefault();
     undoMove();
@@ -802,17 +835,6 @@ speedControlInput.addEventListener('change', (event) => {
     animationSpeed = baseSpeed * (1 / markers[event.target.value]);
     localStorage.setItem('game-speed', animationSpeed);
     speedControlValue.textContent = 'x' + markers[event.target.value];
-});
-
-for (let btn of controlsBtns) {
-    btn.addEventListener('click', () => updateBoardMove(btn.dataset.direction));
-}
-
-document.addEventListener('keydown', (e) => {
-    if (e.key.startsWith('Arrow') && !gameIsFinished && !isBoardPaused && victoryWrapper.classList.contains('hidden') && leaderboardWrapper.classList.contains('hidden')) {
-        e.preventDefault();
-        updateBoardMove(e.key.slice(5));
-    }
 });
 
 // Закрытие модалок
@@ -937,7 +959,7 @@ if (x.matches) {
     tileFontRate = 0.125;
 }
 
-// ===== ГЛАВНОЕ: ЗАПУСКАЕМ ИГРУ ПОСЛЕ ПОЛНОЙ ЗАГРУЗКИ =====
+// ===== ЗАПУСК ИГРЫ =====
 window.addEventListener('load', function() {
     console.log('Page fully loaded, starting game...');
     startNewGame();
