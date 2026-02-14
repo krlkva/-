@@ -194,7 +194,6 @@ body {
 .checkbox-item input[type="checkbox"]:disabled + span {
     opacity: 0.5;
     color: #8a9fb0;
-    text-decoration: line-through;
 }
 
 /* Специальный стиль для скорости */
