@@ -122,9 +122,9 @@ body {
     color: #1e3b4f;
     box-shadow: inset 0 1px 4px rgba(255,255,255,0.8), 0 3px 6px rgba(0,0,0,0.05);
     background: #e8edf2;
-    will-change: transform;
-    transform-origin: center center;
+    will-change: transform, z-index;
     transition: box-shadow 0.1s ease;
+    position: relative;
 }
 
 /* Цвета для плиток */
@@ -490,6 +490,7 @@ body {
         transform: scale(1.15);
         filter: brightness(1.1);
         box-shadow: 0 0 20px rgba(255,255,255,0.5);
+        z-index: 101;
     }
     100% {
         transform: scale(1);
@@ -502,4 +503,11 @@ body {
 
 .tile-merge {
     animation: merge 0.15s ease-in-out forwards;
+    z-index: 101 !important;
+}
+
+/* Класс для двигающихся ячеек */
+.moving {
+    z-index: 100 !important;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
 }
