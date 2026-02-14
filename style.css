@@ -121,12 +121,13 @@ body {
     font-weight: 700;
     color: #1e3b4f;
     box-shadow: inset 0 1px 4px rgba(255,255,255,0.8), 0 3px 6px rgba(0,0,0,0.05);
-    transition: all 0.1s ease;
-    position: relative;
     background: #e8edf2;
+    will-change: transform;
+    transform-origin: center center;
+    transition: box-shadow 0.1s ease;
 }
 
-/* Цвета для плиток (будут дополнены через JS) */
+/* Цвета для плиток */
 .gameboard__tile[data-value="2"] { background: #f9fbfd; color: #2c4053; }
 .gameboard__tile[data-value="4"] { background: #f2eee9; color: #2c4053; }
 .gameboard__tile[data-value="8"] { background: #eadbcb; color: #2c4053; }
@@ -165,7 +166,6 @@ body {
     user-select: none;
 }
 
-/* Полностью скрываем стандартный чекбокс */
 .checkbox-item input[type="checkbox"] {
     position: absolute;
     opacity: 0;
@@ -175,7 +175,6 @@ body {
     pointer-events: none;
 }
 
-/* Стиль для отмеченных пунктов - жирный текст с галочкой */
 .checkbox-item input[type="checkbox"]:checked + span {
     font-weight: 600;
     position: relative;
@@ -190,13 +189,11 @@ body {
     font-size: 16px;
 }
 
-/* Стиль для disabled чекбоксов */
 .checkbox-item input[type="checkbox"]:disabled + span {
     opacity: 0.5;
     color: #8a9fb0;
 }
 
-/* Специальный стиль для скорости */
 .speed-text {
     font-weight: 600;
     color: #2b4a62;
@@ -475,12 +472,34 @@ body {
 
 /* ===== АНИМАЦИИ ===== */
 @keyframes appear {
-    0% { transform: scale(0); opacity: 0; }
-    100% { transform: scale(1); opacity: 1; }
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
 }
 
 @keyframes merge {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.2); filter: brightness(1.2); }
-    100% { transform: scale(1); }
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.15);
+        filter: brightness(1.1);
+        box-shadow: 0 0 20px rgba(255,255,255,0.5);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.tile-appear {
+    animation: appear 0.15s ease-out forwards;
+}
+
+.tile-merge {
+    animation: merge 0.15s ease-in-out forwards;
 }
