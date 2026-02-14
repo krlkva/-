@@ -20,7 +20,7 @@ let animationSpeed = 100;
 
 const markers = [0.25, 0.5, 0.75, 1, 2, 3, 5, 10];
 
-// ===== ДОМ ЭЛЕМЕНТЫ =====
+// ===== DOM ЭЛЕМЕНТЫ =====
 const mainContainer = document.getElementById('main-container');
 const settings = mainContainer.querySelector('.settings');
 const scores = mainContainer.querySelector('.scores');
@@ -55,10 +55,8 @@ const nuke = mainContainer.querySelector('.nuke');
 
 // ===== СОЗДАНИЕ ПОЛЯ =====
 function createGameBoard() {
-    // Очищаем поле
     board.innerHTML = '';
     
-    // Создаём 16 плиток (4x4)
     for (let i = 0; i < 16; i++) {
         let wrapper = document.createElement('div');
         wrapper.classList.add('gameboard__tile-wrapper');
@@ -70,11 +68,8 @@ function createGameBoard() {
         wrapper.appendChild(tile);
         board.appendChild(wrapper);
     }
-    
-    console.log('Game board created');
 }
 
-// Создаём поле при загрузке
 createGameBoard();
 const visualTiles = board.querySelectorAll('.gameboard__tile');
 
@@ -125,49 +120,142 @@ function updateBoardMove(direction) {
     updateBoardSnap(movedTiles);
 }
 
-function updateBoardSnap(movedTiles) {
-    prevGameBoard = JSON.parse(JSON.stringify(gameBoard));
-    let animations = [];
+// ===== АНИМАЦИЯ ДВИЖЕНИЯ (ЦИФРЫ ПЕРЕМЕЩАЮТСЯ, ПЛИТКИ ОСТАЮТСЯ) =====
+async function animateMovement(moves) {
+    if (moves.length === 0) return;
     
-    for (let tile of movedTiles) {
-        let animation = animateTile('moved', visualTiles[tile[0][0] * 4 + tile[0][1]], tile[2]);
-        animations.push(animation);
-    }
-
-    setTimeout(() => {
-        for (let animation of animations) {
-            animation.cancel();
-        }
+    return new Promise(resolve => {
+        let flyingTiles = [];
         
-        for (let tile of movedTiles) {
-            let oldTile = gameBoard[tile[0][0]][tile[0][1]];
-            let newTile = gameBoard[tile[1][0]][tile[1][1]];
+        for (let move of moves) {
+            let fromRow = move[0][0];
+            let fromCol = move[0][1];
+            let toRow = move[1][0];
+            let toCol = move[1][1];
             
-            if (oldTile != newTile) {
-                gameBoard[tile[0][0]][tile[0][1]] = 0;
-                gameBoard[tile[1][0]][tile[1][1]] = oldTile;
-            } else {
-                gameBoard[tile[0][0]][tile[0][1]] = 0;
-                gameBoard[tile[1][0]][tile[1][1]] = oldTile * 2;
-                updateScore(oldTile * 2);
-                let visualTile = visualTiles[tile[1][0] * 4 + tile[1][1]];
-                animateTile('combined', visualTile);
-                visualTile.classList.add('active-tile-combined');
-            }
+            let fromIndex = fromRow * 4 + fromCol;
+            let toIndex = toRow * 4 + toCol;
+            
+            let originalTile = visualTiles[fromIndex];
+            let value = gameBoard[fromRow][fromCol];
+            
+            if (value === 0) continue;
+            
+            // Создаём летающую копию цифры
+            let flyingTile = document.createElement('div');
+            flyingTile.className = 'flying-tile';
+            flyingTile.textContent = value;
+            flyingTile.setAttribute('data-value', value);
+            
+            // Получаем позиции
+            let boardRect = board.getBoundingClientRect();
+            let fromTileRect = originalTile.getBoundingClientRect();
+            let toTileRect = visualTiles[toIndex].getBoundingClientRect();
+            
+            // Устанавливаем стили для позиционирования
+            flyingTile.style.position = 'fixed';
+            flyingTile.style.width = fromTileRect.width + 'px';
+            flyingTile.style.height = fromTileRect.height + 'px';
+            flyingTile.style.left = fromTileRect.left + 'px';
+            flyingTile.style.top = fromTileRect.top + 'px';
+            flyingTile.style.zIndex = '1000';
+            flyingTile.style.transition = `all ${animationSpeed}ms ease-in-out`;
+            flyingTile.style.pointerEvents = 'none';
+            flyingTile.style.display = 'flex';
+            flyingTile.style.alignItems = 'center';
+            flyingTile.style.justifyContent = 'center';
+            flyingTile.style.fontSize = window.getComputedStyle(originalTile).fontSize;
+            flyingTile.style.fontWeight = 'bold';
+            
+            document.body.appendChild(flyingTile);
+            
+            flyingTiles.push({
+                element: flyingTile,
+                toRect: toTileRect
+            });
         }
         
-        updateBoardVisual();
-        updateBoardAdd();
+        // Запускаем анимацию
+        requestAnimationFrame(() => {
+            flyingTiles.forEach(tile => {
+                tile.element.style.left = tile.toRect.left + 'px';
+                tile.element.style.top = tile.toRect.top + 'px';
+            });
+        });
         
+        // Удаляем временные плитки после анимации
         setTimeout(() => {
-            if (getFreeTiles().length === 0 && !areMovesAvailable()) {
-                finishGame();
-                return;
-            }
-            resetActiveTiles();
-        }, animationSpeed * 2);
+            flyingTiles.forEach(tile => tile.element.remove());
+            resolve();
+        }, animationSpeed);
+    });
+}
+
+function animateTile(type, tile, shift = '0%, 0%') {
+    let animation;
+    
+    switch (type) {
+        case 'appeared':
+            animation = tile.animate(
+                [
+                    { transform: 'scale(0)', opacity: 0 },
+                    { transform: 'scale(1)', opacity: 1 }
+                ],
+                { duration: animationSpeed, iterations: 1 }
+            );
+            break;
+            
+        case 'combined':
+            animation = tile.animate(
+                [
+                    { transform: 'scale(1)' },
+                    { transform: 'scale(1.2)' },
+                    { transform: 'scale(1)' }
+                ],
+                { duration: animationSpeed, iterations: 1 }
+            );
+            break;
+    }
+    
+    return animation;
+}
+
+async function updateBoardSnap(movedTiles) {
+    prevGameBoard = JSON.parse(JSON.stringify(gameBoard));
+    
+    // Запускаем анимацию движения цифр
+    await animateMovement(movedTiles);
+    
+    // Обновляем состояние игры
+    for (let tile of movedTiles) {
+        let oldTile = gameBoard[tile[0][0]][tile[0][1]];
+        let newTile = gameBoard[tile[1][0]][tile[1][1]];
         
-    }, animationSpeed);
+        if (oldTile != newTile) {
+            gameBoard[tile[0][0]][tile[0][1]] = 0;
+            gameBoard[tile[1][0]][tile[1][1]] = oldTile;
+        } else {
+            gameBoard[tile[0][0]][tile[0][1]] = 0;
+            gameBoard[tile[1][0]][tile[1][1]] = oldTile * 2;
+            updateScore(oldTile * 2);
+            
+            // Анимация слияния
+            let visualTile = visualTiles[tile[1][0] * 4 + tile[1][1]];
+            animateTile('combined', visualTile);
+            visualTile.classList.add('active-tile-combined');
+        }
+    }
+    
+    updateBoardVisual();
+    updateBoardAdd();
+    
+    setTimeout(() => {
+        if (getFreeTiles().length === 0 && !areMovesAvailable()) {
+            finishGame();
+            return;
+        }
+        resetActiveTiles();
+    }, animationSpeed * 2);
 }
 
 function updateBoardAdd() {
@@ -190,33 +278,6 @@ function undoMove() {
     updateScore((prevGameScore - gameScore) * 2);
     prevGameBoard = [];
     undo.classList.add('disabled');
-}
-
-function animateTile(type, tile, shift = '0%, 0%') {
-    let animation;
-    
-    switch (type) {
-        case 'appeared':
-            animation = tile.animate(
-                [{ transform: 'scale(0)' }, { transform: 'scale(1)' }],
-                { duration: animationSpeed, iterations: 1, delay: animationSpeed - 10 }
-            );
-            break;
-        case 'combined':
-            animation = tile.animate(
-                [{ transform: 'scale(1)' }, { transform: 'scale(1.25)' }, { transform: 'scale(1)' }],
-                { duration: animationSpeed, iterations: 1 }
-            );
-            break;
-        case 'moved':
-            animation = tile.animate(
-                [{ transform: 'translate(0)' }, { transform: 'translate(' + shift + ')' }],
-                { duration: animationSpeed, iterations: 1, fill: 'forwards' }
-            );
-            break;
-    }
-    
-    return animation;
 }
 
 function collectMovedTiles(direction) {
@@ -417,13 +478,10 @@ function finishGame() {
 }
 
 function startNewGame() {
-    console.log('Starting new game...');
-    
     gameIsFinished = false;
     isBoardPaused = false;
     victoryWrapper.classList.add('hidden');
     
-    // Очищаем поле
     gameBoard = [
         [0, 0, 0, 0],
         [0, 0, 0, 0],
@@ -435,21 +493,16 @@ function startNewGame() {
     prevGameScore = 0;
     gameScore = 0;
     
-    // Обновляем счёт
     updateScore(0);
     
     // Добавляем 2-3 стартовые плитки
-    let tilesToAdd = getRandomInteger(2) + 2; // 2 или 3
-    console.log('Adding', tilesToAdd, 'tiles');
+    let tilesToAdd = getRandomInteger(2) + 2;
     
     for (let i = 0; i < tilesToAdd; i++) {
         addNewRandomTile();
     }
     
-    // Обновляем отображение
     updateBoardVisual();
-    
-    console.log('Game board:', gameBoard);
 }
 
 function resetActiveTiles() {
@@ -703,7 +756,6 @@ if (localStorage.getItem('leaderboard')) {
     updateBestScore();
 }
 
-// Загружаем настройки скорости
 if (localStorage.getItem('game-speed')) {
     animationSpeed = JSON.parse(localStorage.getItem('game-speed'));
     let speed = Math.round(baseSpeed * 100 / animationSpeed) / 100;
@@ -718,7 +770,6 @@ if (localStorage.getItem('user-name')) {
     userName = localStorage.getItem('user-name');
 }
 
-// Заполняем таблицу лидеров
 populateLeaderboard();
 
 // Адаптация шрифта
@@ -742,9 +793,7 @@ if (x.matches) {
     tileFontRate = 0.125;
 }
 
-// ===== ГЛАВНОЕ: ЗАПУСКАЕМ ИГРУ ПРИ ЗАГРУЗКЕ =====
-// Используем setTimeout чтобы убедиться, что всё загрузилось
+// ===== ЗАПУСК ИГРЫ =====
 setTimeout(() => {
-    console.log('Starting game on page load...');
     startNewGame();
 }, 100);
