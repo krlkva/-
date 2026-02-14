@@ -20,7 +20,7 @@ let animationSpeed = 100;
 
 const markers = [0.25, 0.5, 0.75, 1, 2, 3, 5, 10];
 
-// ===== DOM ЭЛЕМЕНТЫ =====
+// ===== ДОМ ЭЛЕМЕНТЫ =====
 const mainContainer = document.getElementById('main-container');
 const settings = mainContainer.querySelector('.settings');
 const scores = mainContainer.querySelector('.scores');
@@ -53,16 +53,29 @@ const leaderboardBtn = settings.querySelector('.leaderboard-btn');
 const speedControlBtn = settings.querySelector('.speed-control-btn');
 const nuke = mainContainer.querySelector('.nuke');
 
-// Очищаем поле и создаём плитки заново
-board.innerHTML = '';
-for (let i = 0; i < 16; i++) {
-    let wrapper = document.createElement('div');
-    wrapper.classList.add('gameboard__tile-wrapper');
-    board.appendChild(wrapper);
-    let tile = document.createElement('div');
-    tile.classList.add('gameboard__tile');
-    wrapper.appendChild(tile);
+// ===== СОЗДАНИЕ ПОЛЯ =====
+function createGameBoard() {
+    // Очищаем поле
+    board.innerHTML = '';
+    
+    // Создаём 16 плиток (4x4)
+    for (let i = 0; i < 16; i++) {
+        let wrapper = document.createElement('div');
+        wrapper.classList.add('gameboard__tile-wrapper');
+        
+        let tile = document.createElement('div');
+        tile.classList.add('gameboard__tile');
+        tile.setAttribute('data-value', '0');
+        
+        wrapper.appendChild(tile);
+        board.appendChild(wrapper);
+    }
+    
+    console.log('Game board created');
 }
+
+// Создаём поле при загрузке
+createGameBoard();
 const visualTiles = board.querySelectorAll('.gameboard__tile');
 
 // ===== ФУНКЦИИ =====
@@ -342,12 +355,18 @@ function addNewRandomTile() {
         return false;
     }
     
-    let randomRow = freeTiles[getRandomInteger(freeTiles.length)];
-    let newTileCoords = randomRow[getRandomInteger(randomRow.length)];
-    let tileValue = (getRandomInteger(2) + 1) * 2;
+    let randomIndex = getRandomInteger(freeTiles.length);
+    let [row, col] = freeTiles[randomIndex];
+    let tileValue = Math.random() < 0.9 ? 2 : 4;
     
-    gameBoard[newTileCoords[0]][newTileCoords[1]] = tileValue;
-    animateTile('appeared', visualTiles[newTileCoords[0] * 4 + newTileCoords[1]]);
+    gameBoard[row][col] = tileValue;
+    
+    // Анимируем появление
+    let tileIndex = row * 4 + col;
+    if (tileIndex < visualTiles.length) {
+        animateTile('appeared', visualTiles[tileIndex]);
+    }
+    
     return true;
 }
 
@@ -420,17 +439,17 @@ function startNewGame() {
     updateScore(0);
     
     // Добавляем 2-3 стартовые плитки
-    let tilesToAdd = getRandomInteger(2) + 2; // 2 или 3 плитки
+    let tilesToAdd = getRandomInteger(2) + 2; // 2 или 3
     console.log('Adding', tilesToAdd, 'tiles');
     
     for (let i = 0; i < tilesToAdd; i++) {
         addNewRandomTile();
     }
     
-    // Принудительно обновляем отображение
+    // Обновляем отображение
     updateBoardVisual();
     
-    console.log('Game board after start:', gameBoard);
+    console.log('Game board:', gameBoard);
 }
 
 function resetActiveTiles() {
@@ -450,7 +469,10 @@ function updateBoardVisual() {
     
     for (let i = 0; i < 4; i++) {
         for (let j = 0; j < 4; j++) {
-            let tile = visualTiles[i * 4 + j];
+            let index = i * 4 + j;
+            if (index >= visualTiles.length) continue;
+            
+            let tile = visualTiles[index];
             let value = gameBoard[i][j];
             
             tile.setAttribute('data-value', value);
@@ -502,6 +524,8 @@ function addToLeaderboard(newName, newScore, newDate) {
 }
 
 function populateLeaderboard() {
+    if (!leaderboardListElement) return;
+    
     leaderboardListElement.innerHTML = '';
     leaderboardList.sort(compareScore);
     
@@ -596,76 +620,95 @@ document.addEventListener('keydown', (e) => {
 });
 
 // Закрытие модалок
-speedControlWrapper.querySelector('.close-btn').addEventListener('click', () => {
-    closeSpeedControl(speedControlWrapper);
-});
-
-speedControlWrapper.addEventListener('click', (e) => {
-    closeSpeedControl(e);
-});
-
-leaderboardWrapper.addEventListener('click', (e) => {
-    if (e.target.classList.contains('popup')) closeLeaderboard();
-});
-
-leaderboardWrapper.querySelector('.close-btn').addEventListener('click', closeLeaderboard);
-
-victoryForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    addToLeaderboard(victorySubmitName.value, gameScore, new Date().toISOString().slice(0, 10));
-    victoryForm.style.display = 'none';
-    victorySave.style.display = 'none';
-    victoryRecord.style.display = 'none';
-    victoryGif.style.display = 'none';
-    victoryBest.style.display = 'none';
-    victorySaveConfirm.style.display = 'block';
-    userName = sanitize(victorySubmitName.value);
-    localStorage.setItem('user-name', userName);
-});
-
-victoryReset.addEventListener('change', () => {
-    victoryWrapper.classList.add('hidden');
-    startNewGame();
-});
-
-victoryScreen.querySelector('.close-btn').addEventListener('click', () => {
-    victoryWrapper.classList.add('hidden');
-    document.body.classList.remove('stop-scrolling');
-    enableAllButtons();
-});
-
-nuke.addEventListener('click', () => {
-    if (confirm('Are you absolutely sure you want to get rid of your saves & start a new game?') === true) {
-        localStorage.clear();
-        elemBest.textContent = '0';
-        prevGameBoard = [];
-        leaderboardList = [];
-        gameScore = 0;
-        prevGameScore = 0;
-        speedControlInput.value = 3;
-        animationSpeed = baseSpeed;
-        speedControlValue.textContent = 'x' + markers[3];
-        populateLeaderboard();
-        startNewGame();
+if (speedControlWrapper) {
+    let closeBtn = speedControlWrapper.querySelector('.close-btn');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            closeSpeedControl(speedControlWrapper);
+        });
     }
-});
+    
+    speedControlWrapper.addEventListener('click', (e) => {
+        closeSpeedControl(e);
+    });
+}
 
-// ===== ЗАГРУЗКА СОХРАНЕНИЙ И ЗАПУСК =====
-console.log('Initializing game...');
+if (leaderboardWrapper) {
+    leaderboardWrapper.addEventListener('click', (e) => {
+        if (e.target.classList.contains('popup')) closeLeaderboard();
+    });
+    
+    let closeBtn = leaderboardWrapper.querySelector('.close-btn');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', closeLeaderboard);
+    }
+}
 
+if (victoryForm) {
+    victoryForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        addToLeaderboard(victorySubmitName.value, gameScore, new Date().toISOString().slice(0, 10));
+        victoryForm.style.display = 'none';
+        victorySave.style.display = 'none';
+        victoryRecord.style.display = 'none';
+        victoryGif.style.display = 'none';
+        victoryBest.style.display = 'none';
+        victorySaveConfirm.style.display = 'block';
+        userName = sanitize(victorySubmitName.value);
+        localStorage.setItem('user-name', userName);
+    });
+}
+
+if (victoryReset) {
+    victoryReset.addEventListener('change', () => {
+        victoryWrapper.classList.add('hidden');
+        startNewGame();
+    });
+}
+
+if (victoryScreen) {
+    let closeBtn = victoryScreen.querySelector('.close-btn');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            victoryWrapper.classList.add('hidden');
+            document.body.classList.remove('stop-scrolling');
+            enableAllButtons();
+        });
+    }
+}
+
+if (nuke) {
+    nuke.addEventListener('click', () => {
+        if (confirm('Are you absolutely sure you want to get rid of your saves & start a new game?') === true) {
+            localStorage.clear();
+            elemBest.textContent = '0';
+            prevGameBoard = [];
+            leaderboardList = [];
+            gameScore = 0;
+            prevGameScore = 0;
+            if (speedControlInput) {
+                speedControlInput.value = 3;
+                animationSpeed = baseSpeed;
+                speedControlValue.textContent = 'x' + markers[3];
+            }
+            populateLeaderboard();
+            startNewGame();
+        }
+    });
+}
+
+// ===== ЗАГРУЗКА СОХРАНЕНИЙ =====
 if (localStorage.getItem('leaderboard')) {
     leaderboardList = JSON.parse(localStorage.getItem('leaderboard'));
     updateBestScore();
 }
 
-// Всегда запускаем новую игру при загрузке
-startNewGame();
-
+// Загружаем настройки скорости
 if (localStorage.getItem('game-speed')) {
     animationSpeed = JSON.parse(localStorage.getItem('game-speed'));
     let speed = Math.round(baseSpeed * 100 / animationSpeed) / 100;
     let ind = markers.indexOf(Number(speed));
-    if (ind >= 0) {
+    if (ind >= 0 && speedControlInput) {
         speedControlInput.value = ind;
         speedControlValue.textContent = 'x' + markers[ind];
     }
@@ -675,6 +718,7 @@ if (localStorage.getItem('user-name')) {
     userName = localStorage.getItem('user-name');
 }
 
+// Заполняем таблицу лидеров
 populateLeaderboard();
 
 // Адаптация шрифта
@@ -697,3 +741,10 @@ if (x.matches) {
     tileFont = 2.25;
     tileFontRate = 0.125;
 }
+
+// ===== ГЛАВНОЕ: ЗАПУСКАЕМ ИГРУ ПРИ ЗАГРУЗКЕ =====
+// Используем setTimeout чтобы убедиться, что всё загрузилось
+setTimeout(() => {
+    console.log('Starting game on page load...');
+    startNewGame();
+}, 100);
