@@ -14,16 +14,17 @@
                 <h1>KRLKVA 2048 game</h1>
                 <div class="subtitle">Web programming Lab 3</div>
             </div>
+            <div class="yipee">YIPEE</div>
         </div>
 
         <!-- Счётчики -->
         <div class="scores">
             <div class="scores__item">
-                <span class="scores__label">Score</span>
+                <span class="scores__label">SCORE</span>
                 <span class="scores__value" id="current-score">0</span>
             </div>
             <div class="scores__item">
-                <span class="scores__label">Best</span>
+                <span class="scores__label">BEST</span>
                 <span class="scores__value" id="best-score">0</span>
             </div>
         </div>
@@ -51,7 +52,7 @@
             </label>
         </div>
 
-        <!-- Мобильные кнопки управления (появляются только на малых экранах) -->
+        <!-- Мобильные кнопки управления -->
         <div class="controls">
             <div class="controls__row">
                 <button class="controls__arrow" data-direction="up">▲</button>
@@ -72,6 +73,7 @@
                 <div class="victory__title-record" id="record-message">This is a new record!</div>
                 <div class="victory__title-save" id="save-message">Enter your name to save it to the leaderboard!</div>
                 <div class="victory__title-best" id="best-message"></div>
+                <div class="victory__gif" id="victory-gif">🏆</div>
                 
                 <form id="victory-form">
                     <input type="text" id="player-name" placeholder="user" value="user" maxlength="20">
