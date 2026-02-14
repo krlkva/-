@@ -53,7 +53,8 @@ const leaderboardBtn = settings.querySelector('.leaderboard-btn');
 const speedControlBtn = settings.querySelector('.speed-control-btn');
 const nuke = mainContainer.querySelector('.nuke');
 
-// Создаём плитки
+// Очищаем поле и создаём плитки заново
+board.innerHTML = '';
 for (let i = 0; i < 16; i++) {
     let wrapper = document.createElement('div');
     wrapper.classList.add('gameboard__tile-wrapper');
@@ -338,8 +339,7 @@ function getRandomInteger(max) {
 function addNewRandomTile() {
     let freeTiles = getFreeTiles();
     if (freeTiles.length === 0) {
-        finishGame();
-        return;
+        return false;
     }
     
     let randomRow = freeTiles[getRandomInteger(freeTiles.length)];
@@ -348,16 +348,17 @@ function addNewRandomTile() {
     
     gameBoard[newTileCoords[0]][newTileCoords[1]] = tileValue;
     animateTile('appeared', visualTiles[newTileCoords[0] * 4 + newTileCoords[1]]);
+    return true;
 }
 
 function getFreeTiles() {
     let freeTiles = [];
     for (let i = 0; i < 4; i++) {
-        let row = [];
         for (let j = 0; j < 4; j++) {
-            if (gameBoard[i][j] === 0) row.push([i, j]);
+            if (gameBoard[i][j] === 0) {
+                freeTiles.push([i, j]);
+            }
         }
-        if (row.length > 0) freeTiles.push(row);
     }
     return freeTiles;
 }
@@ -397,10 +398,13 @@ function finishGame() {
 }
 
 function startNewGame() {
+    console.log('Starting new game...');
+    
     gameIsFinished = false;
     isBoardPaused = false;
     victoryWrapper.classList.add('hidden');
     
+    // Очищаем поле
     gameBoard = [
         [0, 0, 0, 0],
         [0, 0, 0, 0],
@@ -412,17 +416,21 @@ function startNewGame() {
     prevGameScore = 0;
     gameScore = 0;
     
-    enableAllButtons();
+    // Обновляем счёт
     updateScore(0);
-    updateBoardVisual();
-    updateBestScore();
     
     // Добавляем 2-3 стартовые плитки
-    for (let i = 0; i < getRandomInteger(3) + 1; i++) {
+    let tilesToAdd = getRandomInteger(2) + 2; // 2 или 3 плитки
+    console.log('Adding', tilesToAdd, 'tiles');
+    
+    for (let i = 0; i < tilesToAdd; i++) {
         addNewRandomTile();
     }
     
-    setTimeout(() => updateBoardVisual(), animationSpeed);
+    // Принудительно обновляем отображение
+    updateBoardVisual();
+    
+    console.log('Game board after start:', gameBoard);
 }
 
 function resetActiveTiles() {
@@ -642,18 +650,16 @@ nuke.addEventListener('click', () => {
     }
 });
 
-// ===== ЗАГРУЗКА СОХРАНЕНИЙ =====
+// ===== ЗАГРУЗКА СОХРАНЕНИЙ И ЗАПУСК =====
+console.log('Initializing game...');
+
 if (localStorage.getItem('leaderboard')) {
     leaderboardList = JSON.parse(localStorage.getItem('leaderboard'));
     updateBestScore();
 }
 
-if (localStorage.getItem('game-board')) {
-    gameBoard = JSON.parse(localStorage.getItem('game-board'));
-    gameScore = JSON.parse(localStorage.getItem('game-score')) || 0;
-    elemScore.textContent = gameScore;
-    updateBoardVisual();
-} 
+// Всегда запускаем новую игру при загрузке
+startNewGame();
 
 if (localStorage.getItem('game-speed')) {
     animationSpeed = JSON.parse(localStorage.getItem('game-speed'));
@@ -690,13 +696,4 @@ if (x.matches) {
 } else {
     tileFont = 2.25;
     tileFontRate = 0.125;
-}
-
-// ===== ВАЖНО: ЗАПУСКАЕМ ИГРУ, ЕСЛИ НЕТ СОХРАНЕНИЯ =====
-// Добавляем проверку: если нет сохранённой игры или поле пустое, запускаем новую игру
-if (!localStorage.getItem('game-board') || gameBoard.every(row => row.every(cell => cell === 0))) {
-    startNewGame();
-} else {
-    // Если есть сохранение, обновляем отображение
-    updateBoardVisual();
 }
