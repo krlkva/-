@@ -16,7 +16,7 @@ let userName = 'user';
 let gameIsFinished = false;
 let isBoardPaused = false;
 let baseSpeed = 100;
-let animationSpeed = 150; // Увеличено для плавности
+let animationSpeed = 150;
 
 const markers = [0.25, 0.5, 0.75, 1, 2, 3, 5, 10];
 
@@ -106,7 +106,14 @@ function updateBestScore() {
 function updateBoardMove(direction) {
     if (isBoardPaused || gameIsFinished) return;
     
+    // Сохраняем предыдущее состояние перед ходом
+    prevGameBoard = JSON.parse(JSON.stringify(gameBoard));
     prevGameScore = gameScore;
+    
+    // Активируем кнопку undo
+    undo.classList.remove('disabled');
+    undo.querySelector('input').disabled = false;
+    
     isBoardPaused = true;
     if (speedControlInput) speedControlInput.disabled = true;
     
@@ -136,7 +143,6 @@ function animateTile(type, tile, shift = '0, 0') {
             break;
             
         case 'moved':
-            // Анимация движения - ячейка перемещается
             tile.style.transformOrigin = 'center center';
             animation = tile.animate(
                 [
@@ -156,13 +162,14 @@ function animateTile(type, tile, shift = '0, 0') {
     return animation;
 }
 
-// ===== ЛОГИКА ДВИЖЕНИЯ =====
-function moveTileList(tiles) {
+// ===== ИСПРАВЛЕННАЯ ЛОГИКА ДВИЖЕНИЯ =====
+
+// Движение влево
+function moveTileListLeft(tiles) {
     let movedTiles = [];
     
-    // Рассчитываем расстояние для анимации
     const gameBoardWidth = document.querySelector('.gameboard').offsetWidth;
-    const tileGap = 12; // gap из CSS
+    const tileGap = 12;
     const tileSize = (gameBoardWidth - tileGap * 3) / 4;
     const moveDistance = tileSize + tileGap;
     
@@ -194,39 +201,114 @@ function moveTileList(tiles) {
     return movedTiles;
 }
 
-function moveBoardUp() {
+// Движение вправо
+function moveTileListRight(tiles) {
     let movedTiles = [];
-    for (let j = 0; j < 4; j++) {
-        let column = [];
-        for (let k = 0; k < 4; k++) column.push(gameBoard[k][j]);
-        let movedColumnTiles = moveTileList(column);
-        
-        for (let k = 0; k < movedColumnTiles.length; k++) {
-            movedTiles.push([
-                [movedColumnTiles[k][0], j],
-                [movedColumnTiles[k][1], j],
-                '0, -' + movedColumnTiles[k][2] + 'px'
-            ]);
+    
+    const gameBoardWidth = document.querySelector('.gameboard').offsetWidth;
+    const tileGap = 12;
+    const tileSize = (gameBoardWidth - tileGap * 3) / 4;
+    const moveDistance = tileSize + tileGap;
+    
+    for (let k = 3; k >= 0; k--) {
+        if (tiles[k] === 0) {
+            for (let l = k - 1; l >= 0; l--) {
+                if (tiles[l] !== 0) {
+                    tiles[k] = tiles[l];
+                    tiles[l] = 0;
+                    movedTiles.push([l, k, (k - l) * moveDistance]);
+                    break;
+                }
+            }
+        }
+
+        if (tiles[k] !== 0) {
+            for (let l = k - 1; l >= 0; l--) {
+                if (tiles[l] === 0) continue;
+                if (tiles[l] === tiles[k]) {
+                    tiles[k] = tiles[l] * 2;
+                    tiles[l] = 0;
+                    movedTiles.push([l, k, (k - l) * moveDistance]);
+                }
+                break;
+            }
         }
     }
+    
     return movedTiles;
 }
 
-function moveBoardDown() {
+// Движение вверх
+function moveTileListUp(tiles) {
     let movedTiles = [];
-    for (let j = 0; j < 4; j++) {
-        let column = [];
-        for (let k = 3; k >= 0; k--) column.push(gameBoard[k][j]);
-        let movedColumnTiles = moveTileList(column);
-        
-        for (let k = 0; k < movedColumnTiles.length; k++) {
-            movedTiles.push([
-                [3 - movedColumnTiles[k][0], j],
-                [3 - movedColumnTiles[k][1], j],
-                '0, ' + movedColumnTiles[k][2] + 'px'
-            ]);
+    
+    const gameBoardWidth = document.querySelector('.gameboard').offsetWidth;
+    const tileGap = 12;
+    const tileSize = (gameBoardWidth - tileGap * 3) / 4;
+    const moveDistance = tileSize + tileGap;
+    
+    for (let k = 0; k < 4; k++) {
+        if (tiles[k] === 0) {
+            for (let l = k + 1; l < 4; l++) {
+                if (tiles[l] !== 0) {
+                    tiles[k] = tiles[l];
+                    tiles[l] = 0;
+                    movedTiles.push([l, k, (l - k) * moveDistance]);
+                    break;
+                }
+            }
+        }
+
+        if (tiles[k] !== 0) {
+            for (let l = k + 1; l < 4; l++) {
+                if (tiles[l] === 0) continue;
+                if (tiles[l] === tiles[k]) {
+                    tiles[k] = tiles[l] * 2;
+                    tiles[l] = 0;
+                    movedTiles.push([l, k, (l - k) * moveDistance]);
+                }
+                break;
+            }
         }
     }
+    
+    return movedTiles;
+}
+
+// Движение вниз
+function moveTileListDown(tiles) {
+    let movedTiles = [];
+    
+    const gameBoardWidth = document.querySelector('.gameboard').offsetWidth;
+    const tileGap = 12;
+    const tileSize = (gameBoardWidth - tileGap * 3) / 4;
+    const moveDistance = tileSize + tileGap;
+    
+    for (let k = 3; k >= 0; k--) {
+        if (tiles[k] === 0) {
+            for (let l = k - 1; l >= 0; l--) {
+                if (tiles[l] !== 0) {
+                    tiles[k] = tiles[l];
+                    tiles[l] = 0;
+                    movedTiles.push([l, k, (k - l) * moveDistance]);
+                    break;
+                }
+            }
+        }
+
+        if (tiles[k] !== 0) {
+            for (let l = k - 1; l >= 0; l--) {
+                if (tiles[l] === 0) continue;
+                if (tiles[l] === tiles[k]) {
+                    tiles[k] = tiles[l] * 2;
+                    tiles[l] = 0;
+                    movedTiles.push([l, k, (k - l) * moveDistance]);
+                }
+                break;
+            }
+        }
+    }
+    
     return movedTiles;
 }
 
@@ -235,7 +317,8 @@ function moveBoardLeft() {
     for (let i = 0; i < 4; i++) {
         let row = [];
         for (let k = 0; k < 4; k++) row.push(gameBoard[i][k]);
-        let movedRowTiles = moveTileList(row);
+        let workingRow = [...row];
+        let movedRowTiles = moveTileListLeft(workingRow);
         
         for (let k = 0; k < movedRowTiles.length; k++) {
             movedTiles.push([
@@ -252,14 +335,53 @@ function moveBoardRight() {
     let movedTiles = [];
     for (let i = 0; i < 4; i++) {
         let row = [];
-        for (let k = 3; k >= 0; k--) row.push(gameBoard[i][k]);
-        let movedRowTiles = moveTileList(row);
+        for (let k = 0; k < 4; k++) row.push(gameBoard[i][k]);
+        let workingRow = [...row];
+        let movedRowTiles = moveTileListRight(workingRow);
         
         for (let k = 0; k < movedRowTiles.length; k++) {
             movedTiles.push([
-                [i, 3 - movedRowTiles[k][0]],
-                [i, 3 - movedRowTiles[k][1]],
+                [i, movedRowTiles[k][0]],
+                [i, movedRowTiles[k][1]],
                 movedRowTiles[k][2] + 'px, 0'
+            ]);
+        }
+    }
+    return movedTiles;
+}
+
+function moveBoardUp() {
+    let movedTiles = [];
+    for (let j = 0; j < 4; j++) {
+        let column = [];
+        for (let k = 0; k < 4; k++) column.push(gameBoard[k][j]);
+        let workingCol = [...column];
+        let movedColumnTiles = moveTileListUp(workingCol);
+        
+        for (let k = 0; k < movedColumnTiles.length; k++) {
+            movedTiles.push([
+                [movedColumnTiles[k][0], j],
+                [movedColumnTiles[k][1], j],
+                '0, -' + movedColumnTiles[k][2] + 'px'
+            ]);
+        }
+    }
+    return movedTiles;
+}
+
+function moveBoardDown() {
+    let movedTiles = [];
+    for (let j = 0; j < 4; j++) {
+        let column = [];
+        for (let k = 0; k < 4; k++) column.push(gameBoard[k][j]);
+        let workingCol = [...column];
+        let movedColumnTiles = moveTileListDown(workingCol);
+        
+        for (let k = 0; k < movedColumnTiles.length; k++) {
+            movedTiles.push([
+                [movedColumnTiles[k][0], j],
+                [movedColumnTiles[k][1], j],
+                '0, ' + movedColumnTiles[k][2] + 'px'
             ]);
         }
     }
@@ -278,10 +400,8 @@ function collectMovedTiles(direction) {
 }
 
 function updateBoardSnap(movedTiles) {
-    prevGameBoard = JSON.parse(JSON.stringify(gameBoard));
     let animations = [];
     
-    // Запускаем анимацию движения для всех перемещающихся ячеек
     for (let tile of movedTiles) {
         let fromRow = tile[0][0];
         let fromCol = tile[0][1];
@@ -292,19 +412,15 @@ function updateBoardSnap(movedTiles) {
         if (animation) animations.push(animation);
     }
 
-    // После завершения анимации обновляем состояние
     setTimeout(() => {
-        // Отменяем все анимации и возвращаем ячейки на место
         for (let animation of animations) {
             if (animation) animation.cancel();
         }
         
-        // Возвращаем все ячейки в исходное положение
         for (let i = 0; i < visualTiles.length; i++) {
             visualTiles[i].style.transform = '';
         }
         
-        // Обновляем игровое поле
         for (let tile of movedTiles) {
             let oldTile = gameBoard[tile[0][0]][tile[0][1]];
             let newTile = gameBoard[tile[1][0]][tile[1][1]];
@@ -317,7 +433,6 @@ function updateBoardSnap(movedTiles) {
                 gameBoard[tile[1][0]][tile[1][1]] = oldTile * 2;
                 updateScore(oldTile * 2);
                 
-                // Анимация слияния
                 let visualTile = visualTiles[tile[1][0] * 4 + tile[1][1]];
                 animateTile('combined', visualTile);
                 visualTile.classList.add('active-tile-combined');
@@ -350,14 +465,29 @@ function updateBoardAdd() {
     }, animationSpeed);
 }
 
+// ===== ИСПРАВЛЕННАЯ ФУНКЦИЯ UNDO =====
 function undoMove() {
-    if (prevGameBoard.length === 0 || gameIsFinished) return;
+    if (prevGameBoard.length === 0 || gameIsFinished || isBoardPaused) {
+        return;
+    }
     
     gameBoard = JSON.parse(JSON.stringify(prevGameBoard));
-    updateBoardVisual();
-    updateScore((prevGameScore - gameScore) * 2);
+    gameScore = prevGameScore;
+    
     prevGameBoard = [];
+    prevGameScore = 0;
+    
     undo.classList.add('disabled');
+    undo.querySelector('input').disabled = true;
+    
+    updateScore(0);
+    updateBoardVisual();
+    
+    gameIsFinished = false;
+    isBoardPaused = false;
+    
+    victoryWrapper.classList.add('hidden');
+    document.body.classList.remove('stop-scrolling');
 }
 
 function areMovesAvailable() {
@@ -385,7 +515,6 @@ function addNewRandomTile() {
     
     gameBoard[row][col] = tileValue;
     
-    // Анимируем появление
     let tileIndex = row * 4 + col;
     if (tileIndex < visualTiles.length) {
         animateTile('appeared', visualTiles[tileIndex]);
@@ -416,6 +545,9 @@ function finishGame() {
     
     isBoardPaused = true;
     gameIsFinished = true;
+    
+    undo.classList.add('disabled');
+    undo.querySelector('input').disabled = true;
     
     if (gameScore == null) gameScore = 0;
     victoryScore.textContent = 'You scored ' + gameScore + ' points.';
@@ -456,9 +588,11 @@ function startNewGame() {
     prevGameScore = 0;
     gameScore = 0;
     
+    undo.classList.add('disabled');
+    undo.querySelector('input').disabled = true;
+    
     updateScore(0);
     
-    // Добавляем 2-3 стартовые плитки
     let tilesToAdd = getRandomInteger(2) + 2;
     
     for (let i = 0; i < tilesToAdd; i++) {
@@ -477,12 +611,6 @@ function resetActiveTiles() {
 }
 
 function updateBoardVisual() {
-    if (prevGameBoard.length === 0) {
-        undo.classList.add('disabled');
-    } else {
-        undo.classList.remove('disabled');
-    }
-    
     for (let i = 0; i < 4; i++) {
         for (let j = 0; j < 4; j++) {
             let index = i * 4 + j;
@@ -599,21 +727,35 @@ function closeSpeedControl(e) {
 }
 
 // ===== ОБРАБОТЧИКИ СОБЫТИЙ =====
-undo.addEventListener('click', undoMove);
+undo.addEventListener('click', function(e) {
+    e.preventDefault();
+    undoMove();
+    this.querySelector('input').checked = false;
+});
 
-reset.addEventListener('click', () => {
+reset.addEventListener('click', function(e) {
+    e.preventDefault();
     if (confirm('Are you absolutely sure you want to start a new game?') === true) {
         startNewGame();
     }
+    this.querySelector('input').checked = false;
 });
 
-speedControlBtn.addEventListener('click', () => {
+speedControlBtn.addEventListener('click', function(e) {
+    e.preventDefault();
     if (speedControlWrapper.classList.contains('hidden')) {
         isBoardPaused = true;
         disableAllButtons(speedControlWrapper);
         speedControlWrapper.classList.remove('hidden');
         document.body.classList.add('stop-scrolling');
     }
+    this.querySelector('input').checked = false;
+});
+
+leaderboardBtn.addEventListener('click', function(e) {
+    e.preventDefault();
+    openLeaderboard();
+    this.querySelector('input').checked = false;
 });
 
 speedControlInput.addEventListener('change', (event) => {
@@ -621,8 +763,6 @@ speedControlInput.addEventListener('change', (event) => {
     localStorage.setItem('game-speed', animationSpeed);
     speedControlValue.textContent = 'x' + markers[event.target.value];
 });
-
-leaderboardBtn.addEventListener('click', openLeaderboard);
 
 for (let btn of controlsBtns) {
     btn.addEventListener('click', () => updateBoardMove(btn.dataset.direction));
@@ -676,9 +816,10 @@ if (victoryForm) {
 }
 
 if (victoryReset) {
-    victoryReset.addEventListener('change', () => {
+    victoryReset.addEventListener('change', (e) => {
         victoryWrapper.classList.add('hidden');
         startNewGame();
+        e.target.checked = false;
     });
 }
 
