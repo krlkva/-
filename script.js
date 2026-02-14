@@ -16,7 +16,7 @@ let userName = 'user';
 let gameIsFinished = false;
 let isBoardPaused = false;
 let baseSpeed = 100;
-let animationSpeed = 100;
+let animationSpeed = 150; // Увеличено для плавности
 
 const markers = [0.25, 0.5, 0.75, 1, 2, 3, 5, 10];
 
@@ -120,142 +120,222 @@ function updateBoardMove(direction) {
     updateBoardSnap(movedTiles);
 }
 
-// ===== АНИМАЦИЯ ДВИЖЕНИЯ (ЦИФРЫ ПЕРЕМЕЩАЮТСЯ, ПЛИТКИ ОСТАЮТСЯ) =====
-async function animateMovement(moves) {
-    if (moves.length === 0) return;
-    
-    return new Promise(resolve => {
-        let flyingTiles = [];
-        
-        for (let move of moves) {
-            let fromRow = move[0][0];
-            let fromCol = move[0][1];
-            let toRow = move[1][0];
-            let toCol = move[1][1];
-            
-            let fromIndex = fromRow * 4 + fromCol;
-            let toIndex = toRow * 4 + toCol;
-            
-            let originalTile = visualTiles[fromIndex];
-            let value = gameBoard[fromRow][fromCol];
-            
-            if (value === 0) continue;
-            
-            // Создаём летающую копию цифры
-            let flyingTile = document.createElement('div');
-            flyingTile.className = 'flying-tile';
-            flyingTile.textContent = value;
-            flyingTile.setAttribute('data-value', value);
-            
-            // Получаем позиции
-            let boardRect = board.getBoundingClientRect();
-            let fromTileRect = originalTile.getBoundingClientRect();
-            let toTileRect = visualTiles[toIndex].getBoundingClientRect();
-            
-            // Устанавливаем стили для позиционирования
-            flyingTile.style.position = 'fixed';
-            flyingTile.style.width = fromTileRect.width + 'px';
-            flyingTile.style.height = fromTileRect.height + 'px';
-            flyingTile.style.left = fromTileRect.left + 'px';
-            flyingTile.style.top = fromTileRect.top + 'px';
-            flyingTile.style.zIndex = '1000';
-            flyingTile.style.transition = `all ${animationSpeed}ms ease-in-out`;
-            flyingTile.style.pointerEvents = 'none';
-            flyingTile.style.display = 'flex';
-            flyingTile.style.alignItems = 'center';
-            flyingTile.style.justifyContent = 'center';
-            flyingTile.style.fontSize = window.getComputedStyle(originalTile).fontSize;
-            flyingTile.style.fontWeight = 'bold';
-            
-            document.body.appendChild(flyingTile);
-            
-            flyingTiles.push({
-                element: flyingTile,
-                toRect: toTileRect
-            });
-        }
-        
-        // Запускаем анимацию
-        requestAnimationFrame(() => {
-            flyingTiles.forEach(tile => {
-                tile.element.style.left = tile.toRect.left + 'px';
-                tile.element.style.top = tile.toRect.top + 'px';
-            });
-        });
-        
-        // Удаляем временные плитки после анимации
-        setTimeout(() => {
-            flyingTiles.forEach(tile => tile.element.remove());
-            resolve();
-        }, animationSpeed);
-    });
-}
-
-function animateTile(type, tile, shift = '0%, 0%') {
+// ===== АНИМАЦИИ =====
+function animateTile(type, tile, shift = '0, 0') {
     let animation;
     
     switch (type) {
         case 'appeared':
-            animation = tile.animate(
-                [
-                    { transform: 'scale(0)', opacity: 0 },
-                    { transform: 'scale(1)', opacity: 1 }
-                ],
-                { duration: animationSpeed, iterations: 1 }
-            );
+            tile.classList.add('tile-appear');
+            setTimeout(() => tile.classList.remove('tile-appear'), animationSpeed);
             break;
             
         case 'combined':
+            tile.classList.add('tile-merge');
+            setTimeout(() => tile.classList.remove('tile-merge'), animationSpeed);
+            break;
+            
+        case 'moved':
+            // Анимация движения - ячейка перемещается
+            tile.style.transformOrigin = 'center center';
             animation = tile.animate(
                 [
-                    { transform: 'scale(1)' },
-                    { transform: 'scale(1.2)' },
-                    { transform: 'scale(1)' }
+                    { transform: 'translate(0, 0)' },
+                    { transform: 'translate(' + shift + ')' }
                 ],
-                { duration: animationSpeed, iterations: 1 }
+                {
+                    duration: animationSpeed,
+                    iterations: 1,
+                    fill: 'forwards',
+                    easing: 'ease-in-out'
+                }
             );
-            break;
+            return animation;
     }
     
     return animation;
 }
 
-async function updateBoardSnap(movedTiles) {
-    prevGameBoard = JSON.parse(JSON.stringify(gameBoard));
+// ===== ЛОГИКА ДВИЖЕНИЯ =====
+function moveTileList(tiles) {
+    let movedTiles = [];
     
-    // Запускаем анимацию движения цифр
-    await animateMovement(movedTiles);
+    // Рассчитываем расстояние для анимации
+    const gameBoardWidth = document.querySelector('.gameboard').offsetWidth;
+    const tileGap = 12; // gap из CSS
+    const tileSize = (gameBoardWidth - tileGap * 3) / 4;
+    const moveDistance = tileSize + tileGap;
     
-    // Обновляем состояние игры
-    for (let tile of movedTiles) {
-        let oldTile = gameBoard[tile[0][0]][tile[0][1]];
-        let newTile = gameBoard[tile[1][0]][tile[1][1]];
-        
-        if (oldTile != newTile) {
-            gameBoard[tile[0][0]][tile[0][1]] = 0;
-            gameBoard[tile[1][0]][tile[1][1]] = oldTile;
-        } else {
-            gameBoard[tile[0][0]][tile[0][1]] = 0;
-            gameBoard[tile[1][0]][tile[1][1]] = oldTile * 2;
-            updateScore(oldTile * 2);
-            
-            // Анимация слияния
-            let visualTile = visualTiles[tile[1][0] * 4 + tile[1][1]];
-            animateTile('combined', visualTile);
-            visualTile.classList.add('active-tile-combined');
+    for (let k = 0; k < 4; k++) {
+        if (tiles[k] === 0) {
+            for (let l = k + 1; l < 4; l++) {
+                if (tiles[l] !== 0) {
+                    tiles[k] = tiles[l];
+                    tiles[l] = 0;
+                    movedTiles.push([l, k, (l - k) * moveDistance]);
+                    break;
+                }
+            }
+        }
+
+        if (tiles[k] !== 0) {
+            for (let l = k + 1; l < 4; l++) {
+                if (tiles[l] === 0) continue;
+                if (tiles[l] === tiles[k]) {
+                    tiles[k] = tiles[l] * 2;
+                    tiles[l] = 0;
+                    movedTiles.push([l, k, (l - k) * moveDistance]);
+                }
+                break;
+            }
         }
     }
     
-    updateBoardVisual();
-    updateBoardAdd();
-    
-    setTimeout(() => {
-        if (getFreeTiles().length === 0 && !areMovesAvailable()) {
-            finishGame();
-            return;
+    return movedTiles;
+}
+
+function moveBoardUp() {
+    let movedTiles = [];
+    for (let j = 0; j < 4; j++) {
+        let column = [];
+        for (let k = 0; k < 4; k++) column.push(gameBoard[k][j]);
+        let movedColumnTiles = moveTileList(column);
+        
+        for (let k = 0; k < movedColumnTiles.length; k++) {
+            movedTiles.push([
+                [movedColumnTiles[k][0], j],
+                [movedColumnTiles[k][1], j],
+                '0, -' + movedColumnTiles[k][2] + 'px'
+            ]);
         }
-        resetActiveTiles();
-    }, animationSpeed * 2);
+    }
+    return movedTiles;
+}
+
+function moveBoardDown() {
+    let movedTiles = [];
+    for (let j = 0; j < 4; j++) {
+        let column = [];
+        for (let k = 3; k >= 0; k--) column.push(gameBoard[k][j]);
+        let movedColumnTiles = moveTileList(column);
+        
+        for (let k = 0; k < movedColumnTiles.length; k++) {
+            movedTiles.push([
+                [3 - movedColumnTiles[k][0], j],
+                [3 - movedColumnTiles[k][1], j],
+                '0, ' + movedColumnTiles[k][2] + 'px'
+            ]);
+        }
+    }
+    return movedTiles;
+}
+
+function moveBoardLeft() {
+    let movedTiles = [];
+    for (let i = 0; i < 4; i++) {
+        let row = [];
+        for (let k = 0; k < 4; k++) row.push(gameBoard[i][k]);
+        let movedRowTiles = moveTileList(row);
+        
+        for (let k = 0; k < movedRowTiles.length; k++) {
+            movedTiles.push([
+                [i, movedRowTiles[k][0]],
+                [i, movedRowTiles[k][1]],
+                '-' + movedRowTiles[k][2] + 'px, 0'
+            ]);
+        }
+    }
+    return movedTiles;
+}
+
+function moveBoardRight() {
+    let movedTiles = [];
+    for (let i = 0; i < 4; i++) {
+        let row = [];
+        for (let k = 3; k >= 0; k--) row.push(gameBoard[i][k]);
+        let movedRowTiles = moveTileList(row);
+        
+        for (let k = 0; k < movedRowTiles.length; k++) {
+            movedTiles.push([
+                [i, 3 - movedRowTiles[k][0]],
+                [i, 3 - movedRowTiles[k][1]],
+                movedRowTiles[k][2] + 'px, 0'
+            ]);
+        }
+    }
+    return movedTiles;
+}
+
+function collectMovedTiles(direction) {
+    direction = direction.toLowerCase();
+    switch (direction) {
+        case 'up': return moveBoardUp();
+        case 'down': return moveBoardDown();
+        case 'left': return moveBoardLeft();
+        case 'right': return moveBoardRight();
+        default: return [];
+    }
+}
+
+function updateBoardSnap(movedTiles) {
+    prevGameBoard = JSON.parse(JSON.stringify(gameBoard));
+    let animations = [];
+    
+    // Запускаем анимацию движения для всех перемещающихся ячеек
+    for (let tile of movedTiles) {
+        let fromRow = tile[0][0];
+        let fromCol = tile[0][1];
+        let shift = tile[2];
+        
+        let movingTile = visualTiles[fromRow * 4 + fromCol];
+        let animation = animateTile('moved', movingTile, shift);
+        if (animation) animations.push(animation);
+    }
+
+    // После завершения анимации обновляем состояние
+    setTimeout(() => {
+        // Отменяем все анимации и возвращаем ячейки на место
+        for (let animation of animations) {
+            if (animation) animation.cancel();
+        }
+        
+        // Возвращаем все ячейки в исходное положение
+        for (let i = 0; i < visualTiles.length; i++) {
+            visualTiles[i].style.transform = '';
+        }
+        
+        // Обновляем игровое поле
+        for (let tile of movedTiles) {
+            let oldTile = gameBoard[tile[0][0]][tile[0][1]];
+            let newTile = gameBoard[tile[1][0]][tile[1][1]];
+            
+            if (oldTile != newTile) {
+                gameBoard[tile[0][0]][tile[0][1]] = 0;
+                gameBoard[tile[1][0]][tile[1][1]] = oldTile;
+            } else {
+                gameBoard[tile[0][0]][tile[0][1]] = 0;
+                gameBoard[tile[1][0]][tile[1][1]] = oldTile * 2;
+                updateScore(oldTile * 2);
+                
+                // Анимация слияния
+                let visualTile = visualTiles[tile[1][0] * 4 + tile[1][1]];
+                animateTile('combined', visualTile);
+                visualTile.classList.add('active-tile-combined');
+            }
+        }
+        
+        updateBoardVisual();
+        updateBoardAdd();
+        
+        setTimeout(() => {
+            if (getFreeTiles().length === 0 && !areMovesAvailable()) {
+                finishGame();
+                return;
+            }
+            resetActiveTiles();
+        }, animationSpeed * 2);
+        
+    }, animationSpeed);
 }
 
 function updateBoardAdd() {
@@ -278,123 +358,6 @@ function undoMove() {
     updateScore((prevGameScore - gameScore) * 2);
     prevGameBoard = [];
     undo.classList.add('disabled');
-}
-
-function collectMovedTiles(direction) {
-    direction = direction.toLowerCase();
-    switch (direction) {
-        case 'up': return moveBoardUp();
-        case 'down': return moveBoardDown();
-        case 'left': return moveBoardLeft();
-        case 'right': return moveBoardRight();
-        default: return [];
-    }
-}
-
-function moveTileList(tiles) {
-    let movedTiles = [];
-    let gameBoardWidth = document.querySelector('.gameboard').offsetWidth;
-    let tileWidth = document.querySelector('.gameboard__tile').offsetWidth;
-    let ratio = (gameBoardWidth / tileWidth - 4) / 10;
-    
-    for (let k = 0; k < 4; k++) {
-        if (tiles[k] === 0) {
-            for (let l = k + 1; l < 4; l++) {
-                if (tiles[l] !== 0) {
-                    tiles[k] = tiles[l];
-                    tiles[l] = 0;
-                    movedTiles.push([l, k, (l - k + (ratio * 2 * (l - k)))]);
-                    break;
-                }
-            }
-        }
-
-        if (tiles[k] !== 0) {
-            for (let l = k + 1; l < 4; l++) {
-                if (tiles[l] === 0) continue;
-                if (tiles[l] === tiles[k]) {
-                    tiles[k] = tiles[l] * 2;
-                    tiles[l] = 0;
-                    movedTiles.push([l, k, (l - k + (ratio * 2 * (l - k)))]);
-                }
-                break;
-            }
-        }
-    }
-    
-    return movedTiles;
-}
-
-function moveBoardUp() {
-    let movedTiles = [];
-    for (let j = 0; j < 4; j++) {
-        let column = [];
-        for (let k = 0; k < 4; k++) column.push(gameBoard[k][j]);
-        let movedColumnTiles = moveTileList(column);
-        
-        for (let k = 0; k < movedColumnTiles.length; k++) {
-            movedTiles.push([
-                [movedColumnTiles[k][0], j],
-                [movedColumnTiles[k][1], j],
-                '0%, ' + (-movedColumnTiles[k][2]) * 100 + '%'
-            ]);
-        }
-    }
-    return movedTiles;
-}
-
-function moveBoardDown() {
-    let movedTiles = [];
-    for (let j = 0; j < 4; j++) {
-        let column = [];
-        for (let k = 3; k >= 0; k--) column.push(gameBoard[k][j]);
-        let movedColumnTiles = moveTileList(column);
-        
-        for (let k = 0; k < movedColumnTiles.length; k++) {
-            movedTiles.push([
-                [3 - movedColumnTiles[k][0], j],
-                [3 - movedColumnTiles[k][1], j],
-                '0%, ' + (movedColumnTiles[k][2]) * 100 + '%'
-            ]);
-        }
-    }
-    return movedTiles;
-}
-
-function moveBoardLeft() {
-    let movedTiles = [];
-    for (let i = 0; i < 4; i++) {
-        let row = [];
-        for (let k = 0; k < 4; k++) row.push(gameBoard[i][k]);
-        let movedRowTiles = moveTileList(row);
-        
-        for (let k = 0; k < movedRowTiles.length; k++) {
-            movedTiles.push([
-                [i, movedRowTiles[k][0]],
-                [i, movedRowTiles[k][1]],
-                (-movedRowTiles[k][2]) * 100 + '%, 0%'
-            ]);
-        }
-    }
-    return movedTiles;
-}
-
-function moveBoardRight() {
-    let movedTiles = [];
-    for (let i = 0; i < 4; i++) {
-        let row = [];
-        for (let k = 3; k >= 0; k--) row.push(gameBoard[i][k]);
-        let movedRowTiles = moveTileList(row);
-        
-        for (let k = 0; k < movedRowTiles.length; k++) {
-            movedTiles.push([
-                [i, 3 - movedRowTiles[k][0]],
-                [i, 3 - movedRowTiles[k][1]],
-                (movedRowTiles[k][2]) * 100 + '%, 0%'
-            ]);
-        }
-    }
-    return movedTiles;
 }
 
 function areMovesAvailable() {
