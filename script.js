@@ -34,7 +34,7 @@ const speedControlSlider = speedControl.querySelector('.speed-control__slider');
 const speedControlInput = speedControlSlider.querySelector('input');
 const speedControlValue = document.getElementById('speed-display');
 const leaderboardWrapper = mainContainer.querySelector('.leaderboard-wrapper');
-const leaderboardList = leaderboardWrapper.querySelector('.leaderboard__list');
+const leaderboardListElement = leaderboardWrapper.querySelector('.leaderboard__list');
 const victoryWrapper = mainContainer.querySelector('.victory-wrapper');
 const victoryScreen = mainContainer.querySelector('.victory');
 const victoryScore = victoryScreen.querySelector('h3');
@@ -417,6 +417,7 @@ function startNewGame() {
     updateBoardVisual();
     updateBestScore();
     
+    // Добавляем 2-3 стартовые плитки
     for (let i = 0; i < getRandomInteger(3) + 1; i++) {
         addNewRandomTile();
     }
@@ -493,19 +494,19 @@ function addToLeaderboard(newName, newScore, newDate) {
 }
 
 function populateLeaderboard() {
-    leaderboardList.innerHTML = '';
+    leaderboardListElement.innerHTML = '';
     leaderboardList.sort(compareScore);
     
     for (let entry of leaderboardList) {
         let li = document.createElement('li');
         li.innerHTML = `<span>${entry.name}</span> <span>${entry.score}</span> <span>${entry.date}</span>`;
-        leaderboardList.appendChild(li);
+        leaderboardListElement.appendChild(li);
     }
     
     for (let i = leaderboardList.length; i < 10; i++) {
         let li = document.createElement('li');
         li.innerHTML = `<span>...</span> <span>0</span> <span>YYYY-MM-DD</span>`;
-        leaderboardList.appendChild(li);
+        leaderboardListElement.appendChild(li);
     }
 }
 
@@ -652,9 +653,7 @@ if (localStorage.getItem('game-board')) {
     gameScore = JSON.parse(localStorage.getItem('game-score')) || 0;
     elemScore.textContent = gameScore;
     updateBoardVisual();
-} else {
-    startNewGame();
-}
+} 
 
 if (localStorage.getItem('game-speed')) {
     animationSpeed = JSON.parse(localStorage.getItem('game-speed'));
@@ -693,9 +692,11 @@ if (x.matches) {
     tileFontRate = 0.125;
 }
 
-// Старт
-if (!board.some(row => row.some(v => v !== 0))) {
-    newGame();
+// ===== ВАЖНО: ЗАПУСКАЕМ ИГРУ, ЕСЛИ НЕТ СОХРАНЕНИЯ =====
+// Добавляем проверку: если нет сохранённой игры или поле пустое, запускаем новую игру
+if (!localStorage.getItem('game-board') || gameBoard.every(row => row.every(cell => cell === 0))) {
+    startNewGame();
 } else {
-    updateBoard();
+    // Если есть сохранение, обновляем отображение
+    updateBoardVisual();
 }
