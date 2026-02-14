@@ -64,12 +64,16 @@ function createGameBoard() {
         let tile = document.createElement('div');
         tile.classList.add('gameboard__tile');
         tile.setAttribute('data-value', '0');
+        tile.textContent = '';
         
         wrapper.appendChild(tile);
         board.appendChild(wrapper);
     }
+    
+    console.log('Game board created');
 }
 
+// Создаём поле сразу
 createGameBoard();
 const visualTiles = board.querySelectorAll('.gameboard__tile');
 
@@ -598,6 +602,8 @@ function finishGame() {
 }
 
 function startNewGame() {
+    console.log('Starting new game...');
+    
     gameIsFinished = false;
     isBoardPaused = false;
     victoryWrapper.classList.add('hidden');
@@ -614,17 +620,26 @@ function startNewGame() {
     gameScore = 0;
     
     undo.classList.add('disabled');
-    undo.querySelector('input').disabled = true;
+    if (undo.querySelector('input')) {
+        undo.querySelector('input').disabled = true;
+    }
     
+    // Обновляем счёт
+    elemScore.textContent = '0';
     updateScore(0);
     
+    // Добавляем 2-3 стартовые плитки
     let tilesToAdd = getRandomInteger(2) + 2;
+    console.log('Adding', tilesToAdd, 'tiles');
     
     for (let i = 0; i < tilesToAdd; i++) {
         addNewRandomTile();
     }
     
+    // Принудительно обновляем отображение
     updateBoardVisual();
+    
+    console.log('Game board:', gameBoard);
 }
 
 function resetActiveTiles() {
@@ -922,7 +937,8 @@ if (x.matches) {
     tileFontRate = 0.125;
 }
 
-// ===== ЗАПУСК ИГРЫ =====
-setTimeout(() => {
+// ===== ГЛАВНОЕ: ЗАПУСКАЕМ ИГРУ ПОСЛЕ ПОЛНОЙ ЗАГРУЗКИ =====
+window.addEventListener('load', function() {
+    console.log('Page fully loaded, starting game...');
     startNewGame();
-}, 100);
+});
