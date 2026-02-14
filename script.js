@@ -692,3 +692,10 @@ if (x.matches) {
     tileFont = 2.25;
     tileFontRate = 0.125;
 }
+
+// Старт
+if (!board.some(row => row.some(v => v !== 0))) {
+    newGame();
+} else {
+    updateBoard();
+}
