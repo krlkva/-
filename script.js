@@ -111,10 +111,15 @@ function updateBestScore() {
 }
 
 function updateBoardMove(direction) {
-    console.log('Moving', direction);
+    console.log('updateBoardMove вызвана с направлением:', direction);
     
-    if (isBoardPaused || gameIsFinished) {
-        console.log('Cannot move: paused or finished');
+    if (isBoardPaused) {
+        console.log('Ход заблокирован: isBoardPaused =', isBoardPaused);
+        return;
+    }
+    
+    if (gameIsFinished) {
+        console.log('Ход заблокирован: gameIsFinished =', gameIsFinished);
         return;
     }
     
@@ -130,10 +135,10 @@ function updateBoardMove(direction) {
     if (speedControlInput) speedControlInput.disabled = true;
     
     let movedTiles = collectMovedTiles(direction);
-    console.log('Moved tiles:', movedTiles);
+    console.log('Перемещаемые плитки:', movedTiles);
     
     if (movedTiles.length === 0) {
-        console.log('No tiles moved');
+        console.log('Нет перемещаемых плиток');
         isBoardPaused = false;
         if (speedControlInput) speedControlInput.disabled = false;
         return;
@@ -779,37 +784,48 @@ function closeSpeedModal() {
 
 // ===== ОБРАБОТЧИКИ СОБЫТИЙ =====
 
-// Обработчик для кнопок управления
-for (let btn of controlsBtns) {
-    btn.addEventListener('click', function() {
-        console.log('Button clicked:', this.dataset.direction);
-        updateBoardMove(this.dataset.direction);
-    });
-}
-
-// ИСПРАВЛЕННЫЙ ОБРАБОТЧИК ДЛЯ КЛАВИАТУРЫ
-document.addEventListener('keydown', function(e) {
-    // Проверяем, что нажата стрелка
-    if (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-        e.preventDefault(); // Предотвращаем скролл страницы
+// ИСПРАВЛЕННЫЙ ПРОСТОЙ ОБРАБОТЧИК ДЛЯ КЛАВИАТУРЫ
+document.addEventListener('keydown', function(event) {
+    // Получаем код нажатой клавиши
+    const key = event.key;
+    
+    // Проверяем, что это стрелка
+    if (key === 'ArrowUp' || key === 'ArrowDown' || key === 'ArrowLeft' || key === 'ArrowRight') {
+        // Отменяем стандартное поведение (скролл страницы)
+        event.preventDefault();
         
         // Определяем направление
         let direction = '';
-        switch(e.key) {
-            case 'ArrowUp': direction = 'up'; break;
-            case 'ArrowDown': direction = 'down'; break;
-            case 'ArrowLeft': direction = 'left'; break;
-            case 'ArrowRight': direction = 'right'; break;
-        }
+        if (key === 'ArrowUp') direction = 'up';
+        else if (key === 'ArrowDown') direction = 'down';
+        else if (key === 'ArrowLeft') direction = 'left';
+        else if (key === 'ArrowRight') direction = 'right';
         
-        console.log('Key pressed:', direction);
+        console.log('Клавиша нажата:', direction);
         
         // Проверяем, можно ли двигаться
         if (!gameIsFinished && !isBoardPaused && victoryWrapper.classList.contains('hidden') && leaderboardWrapper.classList.contains('hidden')) {
+            console.log('Вызов updateBoardMove с направлением:', direction);
             updateBoardMove(direction);
+        } else {
+            console.log('Нельзя двигаться: gameIsFinished=' + gameIsFinished + 
+                        ', isBoardPaused=' + isBoardPaused + 
+                        ', victory hidden=' + victoryWrapper.classList.contains('hidden') + 
+                        ', leaderboard hidden=' + leaderboardWrapper.classList.contains('hidden'));
         }
     }
 });
+
+// Обработчик для мобильных кнопок
+if (controlsBtns && controlsBtns.length > 0) {
+    for (let btn of controlsBtns) {
+        btn.addEventListener('click', function() {
+            const direction = this.dataset.direction;
+            console.log('Мобильная кнопка:', direction);
+            updateBoardMove(direction);
+        });
+    }
+}
 
 undo.addEventListener('click', function(e) {
     e.preventDefault();
