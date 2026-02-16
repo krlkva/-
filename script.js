@@ -764,16 +764,13 @@ function closeLeaderboard() {
     document.body.classList.remove('stop-scrolling');
 }
 
-function closeSpeedControl(e) {
+// ===== ИСПРАВЛЕННАЯ ФУНКЦИЯ ДЛЯ МОДАЛЬНОГО ОКНА СКОРОСТИ =====
+function closeSpeedModal() {
+    console.log('Closing speed modal');
     isBoardPaused = false;
     enableAllButtons();
-    
-    if (!e.target.classList.contains('popup')) return;
-    
-    if (!speedControlWrapper.classList.contains('hidden')) {
-        speedControlWrapper.classList.add('hidden');
-        document.body.classList.remove('stop-scrolling');
-    }
+    speedControlWrapper.classList.add('hidden');
+    document.body.classList.remove('stop-scrolling');
 }
 
 // ===== ОБРАБОТЧИКИ СОБЫТИЙ =====
@@ -814,8 +811,11 @@ reset.addEventListener('click', function(e) {
     this.querySelector('input').checked = false;
 });
 
+// ИСПРАВЛЕННЫЙ ОБРАБОТЧИК ДЛЯ КНОПКИ СКОРОСТИ
 speedControlBtn.addEventListener('click', function(e) {
     e.preventDefault();
+    console.log('Speed button clicked');
+    
     if (speedControlWrapper.classList.contains('hidden')) {
         isBoardPaused = true;
         disableAllButtons(speedControlWrapper);
@@ -824,6 +824,25 @@ speedControlBtn.addEventListener('click', function(e) {
     }
     this.querySelector('input').checked = false;
 });
+
+// Обработчик для кнопки Close в окне скорости
+const closeSpeedBtn = document.getElementById('close-speed-btn');
+if (closeSpeedBtn) {
+    closeSpeedBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        console.log('Close speed button clicked');
+        closeSpeedModal();
+    });
+}
+
+// Закрытие по клику на фон для окна скорости
+if (speedControlWrapper) {
+    speedControlWrapper.addEventListener('click', (e) => {
+        if (e.target.classList.contains('popup')) {
+            closeSpeedModal();
+        }
+    });
+}
 
 leaderboardBtn.addEventListener('click', function(e) {
     e.preventDefault();
@@ -837,20 +856,7 @@ speedControlInput.addEventListener('change', (event) => {
     speedControlValue.textContent = 'x' + markers[event.target.value];
 });
 
-// Закрытие модалок
-if (speedControlWrapper) {
-    let closeBtn = speedControlWrapper.querySelector('.close-btn');
-    if (closeBtn) {
-        closeBtn.addEventListener('click', () => {
-            closeSpeedControl(speedControlWrapper);
-        });
-    }
-    
-    speedControlWrapper.addEventListener('click', (e) => {
-        closeSpeedControl(e);
-    });
-}
-
+// Закрытие модалки лидеров
 if (leaderboardWrapper) {
     leaderboardWrapper.addEventListener('click', (e) => {
         if (e.target.classList.contains('popup')) closeLeaderboard();
