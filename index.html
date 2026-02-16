@@ -19,11 +19,11 @@
         <!-- Счётчики -->
         <div class="scores">
             <div class="scores__item">
-                <span class="scores__label">Счёт</span>
+                <span class="scores__label">СЧЁТ</span>
                 <span class="scores__value" id="current-score">0</span>
             </div>
             <div class="scores__item">
-                <span class="scores__label">Лучший</span>
+                <span class="scores__label">ЛУЧШИЙ</span>
                 <span class="scores__value" id="best-score">0</span>
             </div>
         </div>
@@ -66,23 +66,23 @@
         <!-- Модальное окно завершения игры -->
         <div class="victory-wrapper popup hidden">
             <div class="victory popup__content">
-                <h2>Игра окончена!</h2>
-                <h3 id="victory-score">Ваш счёт 0 очков</h3>
+                <h2>The game is over!</h2>
+                <h3 id="victory-score">You scored 0 points.</h3>
                 
-                <div class="victory__title-record" id="record-message">Новый рекорд!</div>
-                <div class="victory__title-save" id="save-message">Введите имя, чтобы сохранить!</div>
+                <div class="victory__title-record" id="record-message">This is a new record!</div>
+                <div class="victory__title-save" id="save-message">Enter your name to save it to the leaderboard!</div>
                 <div class="victory__title-best" id="best-message"></div>
                 
                 <form id="victory-form">
                     <input type="text" id="player-name" placeholder="user" value="user" maxlength="20">
-                    <button type="submit" class="save-btn">Сохранить</button>
+                    <button type="submit" class="save-btn">Save</button>
                 </form>
                 
-                <div class="victory__title-confirm" id="saved-confirm">Поздравляем!</div>
+                <div class="victory__title-confirm" id="saved-confirm">Congratulations!</div>
                 
                 <label class="checkbox-item victory__reset">
                     <input type="checkbox" id="restart-game">
-                    <span>Начать новую игру</span>
+                    <span>Start a new game</span>
                 </label>
                 
                 <button class="close-btn">✕</button>
@@ -92,19 +92,19 @@
         <!-- Модальное окно лидеров -->
         <div class="leaderboard-wrapper popup hidden">
             <div class="leaderboard popup__content">
-                <h2>Топ-10</h2>
+                <h2>Top-10 leaderboard</h2>
                 <ol class="leaderboard__list" id="leaderboard-list"></ol>
                 <label class="checkbox-item">
                     <input type="checkbox" class="close-btn" id="close-leaderboard">
-                    <span>Закрыть</span>
+                    <span>Close</span>
                 </label>
             </div>
         </div>
 
-        <!-- Модальное окно скорости -->
+        <!-- Модальное окно скорости (ИСПРАВЛЕНО) -->
         <div class="speed-wrapper popup hidden">
             <div class="speed-control popup__content">
-                <h3>Скорость анимации</h3>
+                <h3>Animation speed</h3>
                 <div class="speed-control__slider">
                     <input type="range" min="0" max="7" value="3" step="1" id="speed-slider">
                     <div class="speed-control__markers">
@@ -118,12 +118,12 @@
                         <span>10x</span>
                     </div>
                 </div>
-                <label class="checkbox-item">
-                    <input type="checkbox" class="close-btn" id="close-speed">
-                    <span>Закрыть</span>
-                </label>
+                <div class="close-speed-btn" id="close-speed-btn">
+                    <span>Close</span>
+                </div>
             </div>
         </div>
+
 
     <!-- Подпись -->
     <div class="footer">
@@ -133,4 +133,3 @@
     <script src="script.js"></script>
 </body>
 </html>
-
