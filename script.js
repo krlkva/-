@@ -1,25 +1,22 @@
 (function() {
-    // Константы
     const SIZE = 4;
     const STORAGE_KEY = 'krlkva2048_state';
     const LEADERBOARD_KEY = 'krlkva2048_leaderboard';
     const BEST_KEY = 'krlkva2048_best';
     
-    // Состояние игры
     let board = [];
     let score = 0;
     let best = 0;
     let history = [];
     let gameOver = false;
     
-    // DOM элементы
     const boardElement = document.getElementById('board');
+    const tileContainer = document.getElementById('tileContainer');
     const scoreElement = document.getElementById('score');
     const bestElement = document.getElementById('best');
-    const multiplierElement = document.getElementById('multiplier');
     const mobileControls = document.getElementById('mobileControls');
+    const boardContainer = document.getElementById('boardContainer');
     
-    // Модальные окна
     const gameOverModal = document.getElementById('gameOverModal');
     const leaderboardModal = document.getElementById('leaderboardModal');
     const playerNameInput = document.getElementById('playerName');
@@ -28,62 +25,62 @@
     const restartFromModalBtn = document.getElementById('restartFromModalBtn');
     const leaderboardBody = document.getElementById('leaderboardBody');
     
-    // Кнопки
     const newGameBtn = document.getElementById('newGameBtn');
     const undoBtn = document.getElementById('undoBtn');
     const leaderboardBtn = document.getElementById('leaderboardBtn');
     const closeLeaderboardBtn = document.getElementById('closeLeaderboardBtn');
     
-    // ==================== ИНИЦИАЛИЗАЦИЯ ====================
-    function initGame() {
+    let animating = false;
+    let touchStartX = 0;
+    let touchStartY = 0;
+    
+    function init() {
+        createBoard();
         loadGame();
         loadBest();
         
-        if (isBoardEmpty()) {
-            initializeNewBoard();
+        if (!board.length || board.flat().every(cell => cell === 0)) {
+            resetBoard();
         }
         
-        renderBoard();
+        renderTiles();
         updateScore();
-        updateMultiplier();
         checkGameOver();
         setupEventListeners();
     }
     
-    function isBoardEmpty() {
-        return !board || board.length === 0 || board.flat().every(cell => cell === 0);
+    function createBoard() {
+        boardElement.innerHTML = '';
+        for (let i = 0; i < SIZE; i++) {
+            for (let j = 0; j < SIZE; j++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                boardElement.appendChild(cell);
+            }
+        }
     }
     
-    function initializeNewBoard() {
+    function resetBoard() {
         board = Array(SIZE).fill().map(() => Array(SIZE).fill(0));
         addRandomTile();
         addRandomTile();
         if (Math.random() < 0.5) addRandomTile();
     }
     
-    // ==================== ИГРОВАЯ ЛОГИКА ====================
-    
-    // Добавление случайной плитки (2 или 4)
     function addRandomTile() {
-        const emptyCells = getEmptyCells();
-        if (emptyCells.length === 0) return false;
-        
-        const [row, col] = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-        board[row][col] = Math.random() < 0.9 ? 2 : 4;
-        return true;
-    }
-    
-    function getEmptyCells() {
         const empty = [];
         for (let i = 0; i < SIZE; i++) {
             for (let j = 0; j < SIZE; j++) {
                 if (board[i][j] === 0) empty.push([i, j]);
             }
         }
-        return empty;
+        if (empty.length === 0) return false;
+        
+        const [row, col] = empty[Math.floor(Math.random() * empty.length)];
+        board[row][col] = Math.random() < 0.9 ? 2 : 4;
+        return true;
     }
     
-    // Добавление 1-2 новых плиток после хода
     function addNewTiles() {
         const count = Math.random() < 0.5 ? 1 : 2;
         for (let i = 0; i < count; i++) {
@@ -91,82 +88,144 @@
         }
     }
     
-    // Движение влево
-    function moveLeft() {
-        let moved = false;
-        let scoreGain = 0;
+    function getTilePosition(row, col) {
+        const boardRect = boardElement.getBoundingClientRect();
+        const containerRect = boardContainer.getBoundingClientRect();
+        const cellSize = (boardRect.width - 45) / 4;
+        
+        return {
+            top: row * (cellSize + 15),
+            left: col * (cellSize + 15),
+            width: cellSize,
+            height: cellSize
+        };
+    }
+    
+    function renderTiles(mergedPositions = [], newTiles = []) {
+        tileContainer.innerHTML = '';
         
         for (let i = 0; i < SIZE; i++) {
-            const row = board[i];
-            const nonZero = row.filter(cell => cell !== 0);
+            for (let j = 0; j < SIZE; j++) {
+                const value = board[i][j];
+                if (value === 0) continue;
+                
+                const pos = getTilePosition(i, j);
+                const tile = document.createElement('div');
+                tile.className = `tile tile-${value}`;
+                tile.textContent = value;
+                
+                tile.style.top = pos.top + 'px';
+                tile.style.left = pos.left + 'px';
+                tile.style.width = pos.width + 'px';
+                tile.style.height = pos.height + 'px';
+                
+                if (newTiles.some(([r, c]) => r === i && c === j)) {
+                    tile.classList.add('tile-new');
+                }
+                
+                if (mergedPositions.some(([r, c]) => r === i && c === j)) {
+                    tile.classList.add('tile-merge');
+                }
+                
+                tileContainer.appendChild(tile);
+            }
+        }
+    }
+    
+    function moveLeft() {
+        if (animating || gameOver) return false;
+        
+        let moved = false;
+        let scoreGain = 0;
+        let mergedPositions = [];
+        let newTiles = [];
+        
+        const oldBoard = JSON.parse(JSON.stringify(board));
+        
+        for (let i = 0; i < SIZE; i++) {
+            let row = board[i].filter(cell => cell !== 0);
             
-            // Объединяем соседние одинаковые
-            for (let j = 0; j < nonZero.length - 1; j++) {
-                if (nonZero[j] === nonZero[j + 1]) {
-                    nonZero[j] *= 2;
-                    scoreGain += nonZero[j];
-                    nonZero.splice(j + 1, 1);
+            for (let j = 0; j < row.length - 1; j++) {
+                if (row[j] === row[j + 1]) {
+                    row[j] *= 2;
+                    scoreGain += row[j];
+                    row.splice(j + 1, 1);
                     moved = true;
+                    mergedPositions.push([i, j]);
                 }
             }
             
-            const newRow = [...nonZero, ...Array(SIZE - nonZero.length).fill(0)];
+            while (row.length < SIZE) row.push(0);
             
-            if (JSON.stringify(board[i]) !== JSON.stringify(newRow)) {
+            if (JSON.stringify(board[i]) !== JSON.stringify(row)) {
                 moved = true;
             }
             
-            board[i] = newRow;
+            board[i] = row;
         }
         
         if (moved) {
+            animating = true;
             score += scoreGain;
             updateScore();
-            addNewTiles();
-            saveGame();
+            
+            renderTiles(mergedPositions);
+            
+            setTimeout(() => {
+                addNewTiles();
+                
+                for (let i = 0; i < SIZE; i++) {
+                    for (let j = 0; j < SIZE; j++) {
+                        if (oldBoard[i][j] === 0 && board[i][j] !== 0) {
+                            newTiles.push([i, j]);
+                        }
+                    }
+                }
+                
+                renderTiles([], newTiles);
+                animating = false;
+                saveGame();
+                checkGameOver();
+            }, 150);
         }
         
         return moved;
     }
     
     function moveRight() {
+        if (animating || gameOver) return false;
+        
         for (let i = 0; i < SIZE; i++) {
             board[i] = board[i].reverse();
         }
-        
         const moved = moveLeft();
-        
         for (let i = 0; i < SIZE; i++) {
             board[i] = board[i].reverse();
         }
-        
-        if (moved) renderBoard();
         return moved;
     }
     
     function moveUp() {
+        if (animating || gameOver) return false;
+        
         transpose();
         const moved = moveLeft();
         transpose();
-        
-        if (moved) renderBoard();
         return moved;
     }
     
     function moveDown() {
+        if (animating || gameOver) return false;
+        
         transpose();
         for (let i = 0; i < SIZE; i++) {
             board[i] = board[i].reverse();
         }
-        
         const moved = moveLeft();
-        
         for (let i = 0; i < SIZE; i++) {
             board[i] = board[i].reverse();
         }
         transpose();
-        
-        if (moved) renderBoard();
         return moved;
     }
     
@@ -178,34 +237,27 @@
         }
     }
     
-    // ==================== УПРАВЛЕНИЕ СОСТОЯНИЕМ ====================
-    
     function saveToHistory() {
+        if (animating) return;
         history.push({
             board: JSON.parse(JSON.stringify(board)),
             score: score
         });
-        
         if (history.length > 10) history.shift();
     }
     
     function undo() {
-        if (history.length === 0 || gameOver) return;
-        
+        if (history.length === 0 || gameOver || animating) return;
         const prev = history.pop();
         board = prev.board;
         score = prev.score;
-        
-        renderBoard();
+        renderTiles();
         updateScore();
         saveGame();
         checkGameOver();
     }
     
-    // ==================== ПРОВЕРКА ОКОНЧАНИЯ ИГРЫ ====================
-    
     function checkGameOver() {
-        // Проверка пустых клеток
         for (let i = 0; i < SIZE; i++) {
             for (let j = 0; j < SIZE; j++) {
                 if (board[i][j] === 0) {
@@ -215,7 +267,6 @@
             }
         }
         
-        // Проверка горизонтальных объединений
         for (let i = 0; i < SIZE; i++) {
             for (let j = 0; j < SIZE - 1; j++) {
                 if (board[i][j] === board[i][j + 1]) {
@@ -225,7 +276,6 @@
             }
         }
         
-        // Проверка вертикальных объединений
         for (let i = 0; i < SIZE - 1; i++) {
             for (let j = 0; j < SIZE; j++) {
                 if (board[i][j] === board[i + 1][j]) {
@@ -242,16 +292,12 @@
     
     function showGameOverModal() {
         gameOverModal.classList.remove('hidden');
-        document.getElementById('gameOverTitle').textContent = 'Игра завершена!';
-        document.getElementById('gameOverMessage').textContent = 'Введите имя для сохранения рекорда';
         playerNameInput.classList.remove('hidden');
         saveScoreBtn.classList.remove('hidden');
         savedMessage.classList.add('hidden');
         restartFromModalBtn.classList.remove('hidden');
         mobileControls.style.display = 'none';
     }
-    
-    // ==================== РАБОТА С РЕКОРДАМИ ====================
     
     function saveRecord() {
         const name = playerNameInput.value.trim() || 'Аноним';
@@ -310,8 +356,6 @@
         }
     }
     
-    // ==================== СОХРАНЕНИЕ/ЗАГРУЗКА ====================
-    
     function saveGame() {
         const gameState = { board, score, history };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(gameState));
@@ -331,9 +375,8 @@
         }
     }
     
-    // ==================== НОВАЯ ИГРА ====================
-    
     function newGame() {
+        if (animating) return;
         board = Array(SIZE).fill().map(() => Array(SIZE).fill(0));
         score = 0;
         history = [];
@@ -343,34 +386,13 @@
         addRandomTile();
         if (Math.random() < 0.5) addRandomTile();
         
-        renderBoard();
+        renderTiles();
         updateScore();
         saveGame();
         gameOverModal.classList.add('hidden');
         
-        if (window.innerWidth <= 480) {
-            mobileControls.style.display = 'grid';
-        }
-    }
-    
-    // ==================== ОТРИСОВКА ====================
-    
-    function renderBoard() {
-        boardElement.innerHTML = '';
-        
-        for (let i = 0; i < SIZE; i++) {
-            for (let j = 0; j < SIZE; j++) {
-                const cell = document.createElement('div');
-                cell.className = 'cell';
-                const value = board[i][j];
-                
-                if (value !== 0) {
-                    cell.textContent = value;
-                    cell.classList.add(`tile-${value}`);
-                }
-                
-                boardElement.appendChild(cell);
-            }
+        if (window.innerWidth <= 520) {
+            mobileControls.style.display = 'flex';
         }
     }
     
@@ -379,108 +401,126 @@
         updateBest();
     }
     
-    function updateMultiplier() {
-        const multipliers = ['x0.25', 'x0.5', 'x1', 'x2', 'x4'];
-        const index = Math.floor(Math.random() * multipliers.length);
-        multiplierElement.textContent = multipliers[index];
+    function handleTouchStart(e) {
+        if (gameOver || animating) return;
+        const touch = e.touches[0];
+        touchStartX = touch.clientX;
+        touchStartY = touch.clientY;
     }
     
-    // ==================== ОБРАБОТЧИКИ СОБЫТИЙ ====================
+    function handleTouchEnd(e) {
+        if (gameOver || animating || touchStartX === 0) return;
+        
+        const touch = e.changedTouches[0];
+        const dx = touch.clientX - touchStartX;
+        const dy = touch.clientY - touchStartY;
+        const minSwipeDistance = 30;
+        
+        if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > minSwipeDistance) {
+            saveToHistory();
+            if (dx > 0) {
+                moveRight();
+            } else {
+                moveLeft();
+            }
+        } else if (Math.abs(dy) > minSwipeDistance) {
+            saveToHistory();
+            if (dy > 0) {
+                moveDown();
+            } else {
+                moveUp();
+            }
+        }
+        
+        touchStartX = 0;
+        touchStartY = 0;
+    }
     
     function setupEventListeners() {
-        // Клавиатура
-        document.addEventListener('keydown', handleKeyDown);
-        
-        // Мобильные кнопки
-        document.querySelectorAll('.mobile-btn').forEach(btn => {
-            btn.addEventListener('click', handleMobileMove);
+        document.addEventListener('keydown', (e) => {
+            if (gameOver || animating || !gameOverModal.classList.contains('hidden') || !leaderboardModal.classList.contains('hidden')) return;
+            
+            const arrows = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
+            if (arrows.includes(e.key)) {
+                e.preventDefault();
+            }
+            
+            saveToHistory();
+            
+            switch(e.key) {
+                case 'ArrowLeft': moveLeft(); break;
+                case 'ArrowRight': moveRight(); break;
+                case 'ArrowUp': moveUp(); break;
+                case 'ArrowDown': moveDown(); break;
+                default: return;
+            }
         });
         
-        // Кнопки управления
+        document.querySelectorAll('.joystick-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                if (gameOver || animating || !gameOverModal.classList.contains('hidden') || !leaderboardModal.classList.contains('hidden')) return;
+                
+                const direction = e.currentTarget.dataset.direction;
+                
+                saveToHistory();
+                
+                switch(direction) {
+                    case 'left': moveLeft(); break;
+                    case 'right': moveRight(); break;
+                    case 'up': moveUp(); break;
+                    case 'down': moveDown(); break;
+                }
+            });
+        });
+        
+        boardContainer.addEventListener('touchstart', handleTouchStart, { passive: true });
+        boardContainer.addEventListener('touchend', handleTouchEnd);
+        
         newGameBtn.addEventListener('click', newGame);
         undoBtn.addEventListener('click', undo);
-        leaderboardBtn.addEventListener('click', showLeaderboard);
-        closeLeaderboardBtn.addEventListener('click', hideLeaderboard);
-        saveScoreBtn.addEventListener('click', saveRecord);
-        restartFromModalBtn.addEventListener('click', newGame);
         
-        // Закрытие модальных окон по клику на оверлей
+        leaderboardBtn.addEventListener('click', () => {
+            loadLeaderboard();
+            leaderboardModal.classList.remove('hidden');
+            mobileControls.style.display = 'none';
+        });
+        
+        closeLeaderboardBtn.addEventListener('click', () => {
+            leaderboardModal.classList.add('hidden');
+            if (window.innerWidth <= 520 && !gameOver) {
+                mobileControls.style.display = 'flex';
+            }
+        });
+        
+        saveScoreBtn.addEventListener('click', saveRecord);
+        
+        restartFromModalBtn.addEventListener('click', () => {
+            newGame();
+        });
+        
         document.querySelectorAll('.modal-overlay').forEach(overlay => {
             overlay.addEventListener('click', (e) => {
                 if (e.target === overlay) {
                     overlay.classList.add('hidden');
-                    if (window.innerWidth <= 480 && !gameOver) {
-                        mobileControls.style.display = 'grid';
+                    if (window.innerWidth <= 520 && !gameOver) {
+                        mobileControls.style.display = 'flex';
                     }
                 }
             });
         });
         
-        // Ресайз окна
-        window.addEventListener('resize', handleResize);
+        window.addEventListener('resize', () => {
+            if (!animating) {
+                renderTiles();
+            }
+            
+            if (window.innerWidth <= 520 && !gameOver && gameOverModal.classList.contains('hidden') && leaderboardModal.classList.contains('hidden')) {
+                mobileControls.style.display = 'flex';
+            } else if (window.innerWidth > 520) {
+                mobileControls.style.display = 'none';
+            }
+        });
     }
     
-    function handleKeyDown(e) {
-        if (gameOver || !gameOverModal.classList.contains('hidden') || !leaderboardModal.classList.contains('hidden')) return;
-        
-        const arrows = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
-        if (arrows.includes(e.key)) {
-            e.preventDefault();
-        }
-        
-        saveToHistory();
-        
-        switch(e.key) {
-            case 'ArrowLeft': moveLeft(); break;
-            case 'ArrowRight': moveRight(); break;
-            case 'ArrowUp': moveUp(); break;
-            case 'ArrowDown': moveDown(); break;
-            default: return;
-        }
-        
-        renderBoard();
-        checkGameOver();
-    }
-    
-    function handleMobileMove(e) {
-        if (gameOver || !gameOverModal.classList.contains('hidden') || !leaderboardModal.classList.contains('hidden')) return;
-        
-        const direction = e.currentTarget.dataset.direction;
-        
-        saveToHistory();
-        
-        switch(direction) {
-            case 'left': moveLeft(); break;
-            case 'right': moveRight(); break;
-            case 'up': moveUp(); break;
-            case 'down': moveDown(); break;
-        }
-        
-        renderBoard();
-        checkGameOver();
-    }
-    
-    function showLeaderboard() {
-        loadLeaderboard();
-        leaderboardModal.classList.remove('hidden');
-        mobileControls.style.display = 'none';
-    }
-    
-    function hideLeaderboard() {
-        leaderboardModal.classList.add('hidden');
-        if (window.innerWidth <= 480 && !gameOver) {
-            mobileControls.style.display = 'grid';
-        }
-    }
-    
-    function handleResize() {
-        if (window.innerWidth <= 480 && !gameOver && gameOverModal.classList.contains('hidden') && leaderboardModal.classList.contains('hidden')) {
-            mobileControls.style.display = 'grid';
-        } else if (window.innerWidth > 480) {
-            mobileControls.style.display = 'none';
-        }
-    }
-    
-    // Запуск игры
-    initGame();
+    init();
 })();
