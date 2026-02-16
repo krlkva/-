@@ -22,6 +22,10 @@ const markers = [0.25, 0.5, 0.75, 1, 2, 3, 5, 10];
 
 // ===== DOM ЭЛЕМЕНТЫ =====
 const mainContainer = document.getElementById('main-container');
+if (!mainContainer) {
+    console.error('Main container not found!');
+}
+
 const settings = mainContainer.querySelector('.settings');
 const scores = mainContainer.querySelector('.scores');
 const [elemScore, elemBest] = scores.querySelectorAll('.scores__value');
@@ -783,14 +787,24 @@ for (let btn of controlsBtns) {
     });
 }
 
-// Обработчик для клавиатуры
+// ИСПРАВЛЕННЫЙ ОБРАБОТЧИК ДЛЯ КЛАВИАТУРЫ
 document.addEventListener('keydown', function(e) {
-    if (e.key.startsWith('Arrow')) {
-        e.preventDefault();
+    // Проверяем, что нажата стрелка
+    if (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+        e.preventDefault(); // Предотвращаем скролл страницы
         
-        let direction = e.key.slice(5).toLowerCase();
+        // Определяем направление
+        let direction = '';
+        switch(e.key) {
+            case 'ArrowUp': direction = 'up'; break;
+            case 'ArrowDown': direction = 'down'; break;
+            case 'ArrowLeft': direction = 'left'; break;
+            case 'ArrowRight': direction = 'right'; break;
+        }
+        
         console.log('Key pressed:', direction);
         
+        // Проверяем, можно ли двигаться
         if (!gameIsFinished && !isBoardPaused && victoryWrapper.classList.contains('hidden') && leaderboardWrapper.classList.contains('hidden')) {
             updateBoardMove(direction);
         }
@@ -825,7 +839,7 @@ speedControlBtn.addEventListener('click', function(e) {
     this.querySelector('input').checked = false;
 });
 
-// Обработчик для кнопки Close в окне скорости
+// ИСПРАВЛЕННЫЙ ОБРАБОТЧИК ДЛЯ КНОПКИ CLOSE В ОКНЕ СКОРОСТИ
 const closeSpeedBtn = document.getElementById('close-speed-btn');
 if (closeSpeedBtn) {
     closeSpeedBtn.addEventListener('click', function(e) {
@@ -833,11 +847,13 @@ if (closeSpeedBtn) {
         console.log('Close speed button clicked');
         closeSpeedModal();
     });
+} else {
+    console.error('Close speed button not found!');
 }
 
 // Закрытие по клику на фон для окна скорости
 if (speedControlWrapper) {
-    speedControlWrapper.addEventListener('click', (e) => {
+    speedControlWrapper.addEventListener('click', function(e) {
         if (e.target.classList.contains('popup')) {
             closeSpeedModal();
         }
@@ -858,13 +874,18 @@ speedControlInput.addEventListener('change', (event) => {
 
 // Закрытие модалки лидеров
 if (leaderboardWrapper) {
-    leaderboardWrapper.addEventListener('click', (e) => {
-        if (e.target.classList.contains('popup')) closeLeaderboard();
+    leaderboardWrapper.addEventListener('click', function(e) {
+        if (e.target.classList.contains('popup')) {
+            closeLeaderboard();
+        }
     });
     
     let closeBtn = leaderboardWrapper.querySelector('.close-btn');
     if (closeBtn) {
-        closeBtn.addEventListener('click', closeLeaderboard);
+        closeBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            closeLeaderboard();
+        });
     }
 }
 
