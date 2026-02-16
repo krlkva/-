@@ -1,4 +1,3 @@
-/* ===== ОСНОВНЫЕ СТИЛИ ===== */
 * {
     margin: 0;
     padding: 0;
@@ -24,10 +23,8 @@ body {
     padding: 28px 24px;
     box-shadow: 0 8px 24px rgba(0,0,0,0.05);
     border: 1px solid #e2e9f0;
-    position: relative;
 }
 
-/* ===== ШАПКА ===== */
 .header {
     display: flex;
     justify-content: space-between;
@@ -39,7 +36,6 @@ body {
     font-size: 26px;
     font-weight: 600;
     color: #1a2b3c;
-    letter-spacing: -0.3px;
 }
 
 .subtitle {
@@ -58,7 +54,6 @@ body {
     border: 1px solid #d3dee8;
 }
 
-/* ===== СЧЁТЧИКИ ===== */
 .scores {
     display: flex;
     gap: 20px;
@@ -90,7 +85,6 @@ body {
     line-height: 1.2;
 }
 
-/* ===== ИГРОВОЕ ПОЛЕ ===== */
 .gameboard {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -103,16 +97,9 @@ body {
     position: relative;
 }
 
-.gameboard__tile-wrapper {
-    aspect-ratio: 1 / 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
 .gameboard__tile {
-    width: 100%;
-    height: 100%;
+    aspect-ratio: 1;
+    background: #e8edf2;
     border-radius: 16px;
     display: flex;
     align-items: center;
@@ -121,17 +108,14 @@ body {
     font-weight: 700;
     color: #1e3b4f;
     box-shadow: inset 0 1px 4px rgba(255,255,255,0.8), 0 3px 6px rgba(0,0,0,0.05);
-    background: #e8edf2;
-    will-change: transform, z-index;
+    will-change: transform;
     transition: box-shadow 0.1s ease;
-    position: relative;
 }
 
-/* Цвета для плиток */
-.gameboard__tile[data-value="2"] { background: #f9fbfd; color: #2c4053; }
-.gameboard__tile[data-value="4"] { background: #f2eee9; color: #2c4053; }
-.gameboard__tile[data-value="8"] { background: #eadbcb; color: #2c4053; }
-.gameboard__tile[data-value="16"] { background: #dec9b3; color: #1e2e3d; }
+.gameboard__tile[data-value="2"] { background: #f9fbfd; }
+.gameboard__tile[data-value="4"] { background: #f2eee9; }
+.gameboard__tile[data-value="8"] { background: #eadbcb; }
+.gameboard__tile[data-value="16"] { background: #dec9b3; }
 .gameboard__tile[data-value="32"] { background: #cfb39b; color: white; }
 .gameboard__tile[data-value="64"] { background: #be9b81; color: white; }
 .gameboard__tile[data-value="128"] { background: #ad856a; color: white; font-size: 2rem; }
@@ -140,99 +124,53 @@ body {
 .gameboard__tile[data-value="1024"] { background: #7a4f39; color: white; font-size: 1.7rem; }
 .gameboard__tile[data-value="2048"] { background: #6b402e; color: white; font-size: 1.7rem; }
 
-.active-tile-combined {
-    z-index: 10;
-}
-
-/* ===== ЧЕКБОКСЫ БЕЗ КВАДРАТИКОВ ===== */
 .settings {
     display: flex;
-    flex-wrap: wrap;
-    gap: 20px 30px;
+    gap: 10px;
     margin: 16px 0 20px;
     padding: 8px 0;
     border-top: 1px solid #e4ecf3;
     border-bottom: 1px solid #e4ecf3;
+    flex-wrap: wrap;
 }
 
-.checkbox-item {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    cursor: pointer;
-    font-size: 15px;
-    color: #2b4a62;
-    position: relative;
-    user-select: none;
-}
-
-.checkbox-item input[type="checkbox"] {
-    position: absolute;
-    opacity: 0;
-    width: 0;
-    height: 0;
-    margin: 0;
-    pointer-events: none;
-}
-
-.checkbox-item input[type="checkbox"]:checked + span {
-    font-weight: 600;
-    position: relative;
-    padding-left: 4px;
-}
-
-.checkbox-item input[type="checkbox"]:checked + span::before {
-    content: "✓";
-    margin-right: 6px;
-    color: #2b6a8f;
-    font-weight: bold;
-    font-size: 16px;
-}
-
-.checkbox-item input[type="checkbox"]:disabled + span {
-    opacity: 0.5;
-    color: #8a9fb0;
-}
-
-.speed-text {
-    font-weight: 600;
-    color: #2b4a62;
-    margin-left: 4px;
-}
-
-/* ===== МОБИЛЬНЫЕ КНОПКИ ===== */
-.controls {
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-    margin: 24px 0 16px;
-}
-
-.controls__row {
-    display: flex;
-    gap: 16px;
-    justify-content: center;
-}
-
-.controls__arrow {
-    width: 70px;
-    height: 70px;
-    border-radius: 50%;
+.btn {
     background: white;
-    font-size: 28px;
-    color: #2e506a;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.03);
-    border: 1px solid #e0eaf3;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    border: 1px solid #d2dce5;
+    padding: 10px 20px;
+    border-radius: 40px;
+    font-size: 15px;
+    font-weight: 500;
+    color: #1f3a4f;
     cursor: pointer;
     transition: 0.1s;
 }
 
-.controls__arrow:active {
-    background: #eaf1f8;
+.btn:hover {
+    background: #eef3f8;
+    border-color: #b3c4d1;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.controls {
+    display: none;
+    justify-content: center;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.controls__arrow {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: white;
+    border: 1px solid #e0eaf3;
+    font-size: 24px;
+    cursor: pointer;
 }
 
 @media (max-width: 640px) {
@@ -241,245 +179,47 @@ body {
     }
 }
 
-/* ===== МОДАЛЬНЫЕ ОКНА ===== */
-.popup {
+.modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(30, 40, 50, 0.5);
-    display: flex;
+    background: rgba(0,0,0,0.5);
+    display: none;
     align-items: center;
     justify-content: center;
     z-index: 1000;
-    transition: 0.2s;
 }
 
-.popup.hidden {
-    display: none;
+.modal-overlay.active {
+    display: flex;
 }
 
-.popup__content {
+.modal {
     background: white;
-    border-radius: 32px;
-    padding: 32px;
-    max-width: 440px;
+    border-radius: 20px;
+    padding: 30px;
+    max-width: 400px;
     width: 90%;
-    max-height: 90vh;
-    overflow-y: auto;
-    border: 1px solid #dae3ec;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
     position: relative;
 }
 
-.close-btn {
+.modal-close {
     position: absolute;
-    top: 16px;
-    right: 20px;
+    top: 10px;
+    right: 15px;
     background: none;
     border: none;
     font-size: 20px;
     cursor: pointer;
-    color: #819aad;
-    padding: 8px;
 }
 
-.close-btn:hover {
-    color: #1a2f40;
-}
-
-/* ===== ОКНО ЗАВЕРШЕНИЯ ===== */
-.victory h2 {
-    font-size: 28px;
-    margin-bottom: 16px;
-    color: #1c3344;
-    font-weight: 500;
-}
-
-.victory h3 {
-    font-size: 20px;
-    margin-bottom: 24px;
-    color: #476c84;
-    font-weight: 400;
-    border-bottom: 1px solid #e0eaf3;
-    padding-bottom: 16px;
-}
-
-.victory__title-record {
-    background: #e6f0f9;
-    padding: 14px 18px;
-    border-radius: 40px;
-    margin-bottom: 20px;
-    color: #1f6d4a;
-    font-weight: 500;
-    border: 1px solid #c8dbeb;
-    display: none;
-}
-
-.victory__title-save {
-    color: #3d637b;
-    margin-bottom: 20px;
-    font-size: 16px;
-    display: none;
-}
-
-.victory__title-best {
-    color: #b3442c;
-    font-weight: 500;
-    margin: 12px 0;
-    display: none;
-}
-
-.victory__gif {
-    font-size: 48px;
-    margin: 10px 0;
-    text-align: center;
-    display: none;
-}
-
-.victory__title-confirm {
-    color: #1f6d4a;
-    font-size: 20px;
-    font-weight: 500;
-    text-align: center;
-    padding: 20px;
-    display: none;
-}
-
-.victory form {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin: 24px 0;
-    background: #f5f9ff;
-    padding: 8px 12px 8px 20px;
-    border-radius: 50px;
-    border: 1px solid #d5e2f0;
-}
-
-.victory input {
-    flex: 1;
-    padding: 10px 0;
-    border: none;
-    background: transparent;
-    font-size: 15px;
-    font-family: inherit;
-}
-
-.victory input:focus {
-    outline: none;
-}
-
-.victory input::placeholder {
-    color: #8da3b8;
-}
-
-.victory .save-btn {
-    background: #eef3f8;
-    border: 1px solid #b9cfec;
-    padding: 10px 28px;
-    border-radius: 40px;
-    font-size: 15px;
-    font-weight: 500;
-    color: #1c3f5c;
-    cursor: pointer;
-    transition: 0.1s;
-}
-
-.victory .save-btn:hover {
-    background: #dfe9f2;
-    border-color: #8fb0d1;
-}
-
-.victory__reset {
-    margin-top: 24px;
-    padding-top: 20px;
-    border-top: 2px dashed #c7d9e8;
-    font-size: 16px;
-}
-
-/* ===== ТАБЛИЦА ЛИДЕРОВ ===== */
-.leaderboard h2 {
-    margin-bottom: 24px;
-    color: #1c3344;
-}
-
-.leaderboard__list {
-    list-style: none;
-    margin: 24px 0;
-    max-height: 300px;
-    overflow-y: auto;
-}
-
-.leaderboard__list li {
-    padding: 12px 16px;
-    border-bottom: 1px solid #eef3f8;
-    display: flex;
-    justify-content: space-between;
-    font-size: 16px;
-}
-
-.leaderboard__list li:first-child {
-    background: #f1f7fd;
-    border-radius: 16px 16px 0 0;
-    font-weight: 600;
-}
-
-/* ===== УПРАВЛЕНИЕ СКОРОСТЬЮ ===== */
-.speed-control h3 {
-    margin-bottom: 24px;
-    color: #1c3344;
-}
-
-.speed-control__slider {
-    margin: 30px 0;
-}
-
-.speed-control__slider input {
-    width: 100%;
-    margin-bottom: 12px;
-}
-
-.speed-control__markers {
-    display: flex;
-    justify-content: space-between;
-    font-size: 11px;
-    color: #6b889e;
-}
-
-/* ===== КНОПКА CLOSE В ОКНЕ СКОРОСТИ ===== */
-.close-speed-btn {
-    display: inline-block;
-    padding: 10px 28px;
-    margin-top: 20px;
-    background: #eef3f8;
-    border: 1px solid #c9d9e8;
-    border-radius: 40px;
-    font-size: 15px;
-    cursor: pointer;
-    color: #2a4f6e;
-    text-align: center;
-    transition: 0.1s;
-    font-weight: 500;
-}
-
-.close-speed-btn:hover {
-    background: #dfe9f2;
-    border-color: #8fb0d1;
-}
-
-/* ===== ПОДВАЛ ===== */
 .footer {
     margin-top: 20px;
     font-size: 13px;
     color: #819aad;
     text-align: center;
-}
-
-/* ===== УТИЛИТЫ ===== */
-.hidden {
-    display: none !important;
 }
 
 .disabled {
@@ -491,44 +231,22 @@ body {
     overflow: hidden;
 }
 
-/* ===== АНИМАЦИИ ===== */
 @keyframes appear {
-    0% {
-        transform: scale(0);
-        opacity: 0;
-    }
-    100% {
-        transform: scale(1);
-        opacity: 1;
-    }
+    from { transform: scale(0); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
 }
 
 @keyframes merge {
-    0% {
-        transform: scale(1);
-    }
-    50% {
-        transform: scale(1.15);
-        filter: brightness(1.1);
-        box-shadow: 0 0 20px rgba(255,255,255,0.5);
-        z-index: 101;
-    }
-    100% {
-        transform: scale(1);
-    }
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
 }
 
 .tile-appear {
-    animation: appear 0.15s ease-out forwards;
+    animation: appear 0.15s ease-out;
 }
 
 .tile-merge {
-    animation: merge 0.15s ease-in-out forwards;
-    z-index: 101 !important;
-}
-
-/* Класс для двигающихся ячеек */
-.moving {
-    z-index: 100 !important;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    animation: merge 0.15s ease-in-out;
+    z-index: 10;
 }
