@@ -2,84 +2,96 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KRLKVA 2048</title>
-    <link rel="stylesheet" href="css/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KRLKVA 2048 game</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="game-container">
+    <div id="main-container">
         <div class="header">
             <div class="title-section">
-                <h1>KRLKVA 2048</h1>
-                <p>Web programming Lab 3</p>
+                <h1>KRLKVA 2048 game</h1>
+                <div class="subtitle">Web programming Lab 3</div>
             </div>
-            <div class="scores">
-                <div class="score-card">
-                    <div class="score-label">SCORE</div>
-                    <div class="score-value" id="score">0</div>
+        </div>
+
+        <div class="scores">
+            <div class="scores__item">
+                <span class="scores__label">СЧЁТ</span>
+                <span class="scores__value" id="current-score">0</span>
+            </div>
+            <div class="scores__item">
+                <span class="scores__label">ЛУЧШИЙ</span>
+                <span class="scores__value" id="best-score">0</span>
+            </div>
+        </div>
+
+        <div class="gameboard"></div>
+
+        <div class="settings">
+            <button class="btn" id="new-game">Начать заново</button>
+            <button class="btn" id="undo-move" disabled>Отмена хода</button>
+            <button class="btn" id="show-leaders">Лидеры</button>
+            <button class="btn" id="speed-control">Скорость <span id="speed-display">x1</span></button>
+        </div>
+
+        <div class="controls">
+            <button class="controls__arrow" data-direction="up">▲</button>
+            <button class="controls__arrow" data-direction="left">◀</button>
+            <button class="controls__arrow" data-direction="down">▼</button>
+            <button class="controls__arrow" data-direction="right">▶</button>
+        </div>
+
+        <!-- Модальное окно завершения -->
+        <div class="modal-overlay" id="victory-modal">
+            <div class="modal">
+                <h2>The game is over!</h2>
+                <h3 id="victory-score">You scored 0 points.</h3>
+                <div id="record-message" style="display:none; color:green;">This is a new record!</div>
+                <div id="save-message" style="display:none;">Enter your name to save it to the leaderboard!</div>
+                <div id="best-message" style="display:none; color:gold;">Absolute record!</div>
+                <div id="victory-gif" style="display:none; font-size:50px;">🏆</div>
+                
+                <form id="victory-form" style="display:none;">
+                    <input type="text" id="player-name" placeholder="user" value="user">
+                    <button type="submit">Save</button>
+                </form>
+                
+                <div id="saved-confirm" style="display:none; color:green;">Congratulations!</div>
+                
+                <button class="btn" id="restart-game">Start a new game</button>
+                <button class="modal-close">✕</button>
+            </div>
+        </div>
+
+        <!-- Модальное окно лидеров -->
+        <div class="modal-overlay" id="leaderboard-modal">
+            <div class="modal">
+                <h2>Top-10 leaderboard</h2>
+                <ol id="leaderboard-list"></ol>
+                <button class="modal-close">Close</button>
+            </div>
+        </div>
+
+        <!-- Модальное окно скорости -->
+        <div class="modal-overlay" id="speed-modal">
+            <div class="modal">
+                <h3>Animation speed</h3>
+                <input type="range" min="0" max="7" value="3" step="1" id="speed-slider" style="width:100%">
+                <div style="display:flex; justify-content:space-between; margin:10px 0">
+                    <span>0.25x</span> <span>0.5x</span> <span>0.75x</span> <span>1x</span> 
+                    <span>2x</span> <span>3x</span> <span>5x</span> <span>10x</span>
                 </div>
-                <div class="score-card">
-                    <div class="score-label">BEST</div>
-                    <div class="score-value" id="best">0</div>
-                </div>
+                <button class="modal-close">Close</button>
             </div>
         </div>
 
-        <div class="controls-panel">
-            <button class="btn" id="newGameBtn">Начать заново</button>
-            <button class="btn" id="undoBtn">↩ Отмена хода</button>
-            <button class="btn" id="leaderboardBtn">Лидеры</button>
-            <span class="multiplier" id="multiplier">x1</span>
-        </div>
-
-        <div class="board-container">
-            <div class="board" id="board"></div>
-        </div>
-
-        <div class="mobile-controls" id="mobileControls">
-            <button class="mobile-btn" data-direction="up">↑</button>
-            <button class="mobile-btn" data-direction="left">←</button>
-            <button class="mobile-btn" data-direction="down">↓</button>
-            <button class="mobile-btn" data-direction="right">→</button>
-        </div>
-
-        <div class="footer">
-            Королькова Елизавета | Web Programming Lab 3
-        </div>
     </div>
 
-    <!-- Модальное окно окончания игры -->
-    <div class="modal-overlay hidden" id="gameOverModal">
-        <div class="modal-content">
-            <h2 id="gameOverTitle">Игра завершена!</h2>
-            <div class="game-over-message" id="gameOverMessage">Введите имя для сохранения рекорда</div>
-            <input type="text" class="name-input" id="playerName" placeholder="Ваше имя" maxlength="20">
-            <div class="modal-buttons">
-                <button class="btn primary" id="saveScoreBtn">Сохранить результат</button>
-                <button class="btn" id="restartFromModalBtn">Начать заново</button>
-            </div>
-            <div class="saved-message hidden" id="savedMessage">Ваш рекорд сохранен!</div>
-        </div>
+    <div class="footer">
+        Королькова Елизавета | Web Programming Lab 3
     </div>
 
-    <!-- Модальное окно лидеров -->
-    <div class="modal-overlay hidden" id="leaderboardModal">
-        <div class="modal-content">
-            <h2>Таблица лидеров</h2>
-            <table class="leaderboard-table" id="leaderboardTable">
-                <thead>
-                    <tr>
-                        <th>Игрок</th>
-                        <th>Очки</th>
-                        <th>Дата</th>
-                    </tr>
-                </thead>
-                <tbody id="leaderboardBody"></tbody>
-            </table>
-            <button class="btn close-btn" id="closeLeaderboardBtn">Закрыть</button>
-        </div>
-    </div>
-
-    <script src="js/game.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
