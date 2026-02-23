@@ -599,7 +599,7 @@ function populateLeaderboard() {
 
 function disableAllButtons(exception) {
     let buttons = document.querySelectorAll('button');
-    let exceptions = exception.querySelectorAll('button');
+    let exceptions = exception ? exception.querySelectorAll('button') : [];
     
     for (let btn of buttons) {
         if (![...exceptions].includes(btn)) {
@@ -625,16 +625,17 @@ function closeLeaderboard() {
     document.body.classList.remove('stop-scrolling');
 }
 
-function closeSpeedControl(e) {
-    isBoardPaused = false;
+function openSpeedControl() {
+    disableAllButtons(speedControlWrapper);
+    speedControlWrapper.classList.remove('hidden');
+    document.body.classList.add('stop-scrolling');
+}
+
+function closeSpeedControl() {
     enableAllButtons();
-    
-    if (!e.target.classList.contains('popup')) return;
-    
-    if (!speedControlWrapper.classList.contains('hidden')) {
-        speedControlWrapper.classList.add('hidden');
-        document.body.classList.remove('stop-scrolling');
-    }
+    speedControlWrapper.classList.add('hidden');
+    document.body.classList.remove('stop-scrolling');
+    isBoardPaused = false;
 }
 
 // ===== ОБРАБОТЧИКИ СОБЫТИЙ =====
@@ -646,14 +647,7 @@ reset.addEventListener('click', () => {
     }
 });
 
-speedControlBtn.addEventListener('click', () => {
-    if (speedControlWrapper.classList.contains('hidden')) {
-        isBoardPaused = true;
-        disableAllButtons(speedControlWrapper);
-        speedControlWrapper.classList.remove('hidden');
-        document.body.classList.add('stop-scrolling');
-    }
-});
+speedControlBtn.addEventListener('click', openSpeedControl);
 
 speedControlInput.addEventListener('change', (event) => {
     animationSpeed = baseSpeed * (1 / markers[event.target.value]);
@@ -668,7 +662,7 @@ for (let btn of controlsBtns) {
 }
 
 document.addEventListener('keydown', (e) => {
-    if (e.key.startsWith('Arrow') && !gameIsFinished && !isBoardPaused && victoryWrapper.classList.contains('hidden') && leaderboardWrapper.classList.contains('hidden')) {
+    if (e.key.startsWith('Arrow') && !gameIsFinished && !isBoardPaused && victoryWrapper.classList.contains('hidden') && leaderboardWrapper.classList.contains('hidden') && speedControlWrapper.classList.contains('hidden')) {
         e.preventDefault();
         updateBoardMove(e.key.slice(5));
     }
@@ -678,13 +672,13 @@ document.addEventListener('keydown', (e) => {
 if (speedControlWrapper) {
     let closeBtn = speedControlWrapper.querySelector('.close-btn');
     if (closeBtn) {
-        closeBtn.addEventListener('click', () => {
-            closeSpeedControl(speedControlWrapper);
-        });
+        closeBtn.addEventListener('click', closeSpeedControl);
     }
     
     speedControlWrapper.addEventListener('click', (e) => {
-        closeSpeedControl(e);
+        if (e.target.classList.contains('popup')) {
+            closeSpeedControl();
+        }
     });
 }
 
