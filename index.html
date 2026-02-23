@@ -31,24 +31,12 @@
         <!-- Игровое поле -->
         <div class="gameboard"></div>
 
-        <!-- Панель управления (чекбоксы без квадратиков) -->
+        <!-- Панель управления (теперь это кнопки, а не чекбоксы) -->
         <div class="settings">
-            <label class="checkbox-item">
-                <input type="checkbox" class="reset-btn" id="new-game">
-                <span>Начать заново</span>
-            </label>
-            <label class="checkbox-item">
-                <input type="checkbox" class="undo-btn" id="undo-move" disabled>
-                <span>Отмена хода</span>
-            </label>
-            <label class="checkbox-item">
-                <input type="checkbox" class="leaderboard-btn" id="show-leaders">
-                <span>Лидеры</span>
-            </label>
-            <label class="checkbox-item">
-                <input type="checkbox" class="speed-control-btn" id="speed-control">
-                <span class="speed-text" id="speed-display">x1</span>
-            </label>
+            <button class="reset-btn" id="new-game">Начать заново</button>
+            <button class="undo-btn" id="undo-move" disabled>Отмена хода</button>
+            <button class="leaderboard-btn" id="show-leaders">Лидеры</button>
+            <button class="speed-control-btn" id="speed-control">x1</button>
         </div>
 
         <!-- Мобильные кнопки управления (появляются только на малых экранах) -->
@@ -73,7 +61,6 @@
                 <div class="victory__title-save" id="save-message">Enter your name to save it to the leaderboard!</div>
                 <div class="victory__title-best" id="best-message"></div>
                 
-                
                 <form id="victory-form">
                     <input type="text" id="player-name" placeholder="user" value="user" maxlength="20">
                     <button type="submit" class="save-btn">Save</button>
@@ -81,10 +68,7 @@
                 
                 <div class="victory__title-confirm" id="saved-confirm">Congratulations!</div>
                 
-                <label class="checkbox-item victory__reset">
-                    <input type="checkbox" id="restart-game">
-                    <span>Start a new game</span>
-                </label>
+                <button class="restart-btn" id="restart-game">Start a new game</button>
                 
                 <button class="close-btn">✕</button>
             </div>
@@ -95,10 +79,7 @@
             <div class="leaderboard popup__content">
                 <h2>Top-10 leaderboard</h2>
                 <ol class="leaderboard__list" id="leaderboard-list"></ol>
-                <label class="checkbox-item">
-                    <input type="checkbox" class="close-btn" id="close-leaderboard">
-                    <span>Close</span>
-                </label>
+                <button class="close-btn" id="close-leaderboard">Close</button>
             </div>
         </div>
 
@@ -119,10 +100,7 @@
                         <span>10x</span>
                     </div>
                 </div>
-                <label class="checkbox-item">
-                    <input type="checkbox" class="close-btn" id="close-speed">
-                    <span>Close</span>
-                </label>
+                <button class="close-btn" id="close-speed">Close</button>
             </div>
         </div>
 
