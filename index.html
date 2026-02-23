@@ -3,47 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KRLKVA 2048</title>
+    <title>KRLKVA 2048 game</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <div class="game-container">
         <div class="header">
             <div class="title-section">
-                <h1>KRLKVA 2048</h1>
+                <h1>KRLKVA 2048 game</h1>
                 <p>Web programming Lab 3</p>
             </div>
             <div class="scores">
                 <div class="score-card">
                     <div class="score-label">SCORE</div>
-                    <div class="score-value" id="score">0</div>
+                    <div class="score-value" id="score">6124</div>
                 </div>
                 <div class="score-card">
                     <div class="score-label">BEST</div>
-                    <div class="score-value" id="best">0</div>
+                    <div class="score-value" id="best">6124</div>
                 </div>
+            </div>
+        </div>
+
+        <div class="board-container">
+            <div class="board" id="board">
+                <div class="cell">4</div>
+                <div class="cell">4</div>
+                <div class="cell">2</div>
+                <div class="cell">8</div>
+                <div class="cell">2</div>
+                <div class="cell">32</div>
+                <div class="cell">8</div>
+                <div class="cell">32</div>
+                <div class="cell">8</div>
+                <div class="cell">256</div>
+                <div class="cell">512</div>
+                <div class="cell">2</div>
+                <div class="cell">16</div>
+                <div class="cell">2</div>
+                <div class="cell">16</div>
+                <div class="cell">8</div>
             </div>
         </div>
 
         <div class="controls-panel">
             <button class="btn" id="newGameBtn">Начать заново</button>
             <button class="btn" id="undoBtn">Отмена хода</button>
-            <button class="btn" id="leaderboardBtn">Лидеры</button>
-        </div>
-
-        <div class="board-container" id="boardContainer">
-            <div class="board" id="board"></div>
-            <div class="tile-container" id="tileContainer"></div>
-        </div>
-
-        <!-- Мобильный джойстик -->
-        <div class="mobile-controls" id="mobileControls">
-            <div class="joystick">
-                <button class="joystick-btn btn-up" data-direction="up">↑</button>
-                <button class="joystick-btn btn-left" data-direction="left">←</button>
-                <button class="joystick-btn btn-down" data-direction="down">↓</button>
-                <button class="joystick-btn btn-right" data-direction="right">→</button>
-            </div>
+            <button class="btn leaderboard-btn" id="leaderboardBtn">✔ Лидеры</button>
+            <span class="multiplier" id="multiplier">x0.25</span>
         </div>
 
         <div class="footer">
@@ -56,7 +63,7 @@
         <div class="modal-content">
             <h2>Игра завершена!</h2>
             <p>Введите имя для сохранения рекорда</p>
-            <input type="text" class="name-input" id="playerName" placeholder="Ваше имя" maxlength="20">
+            <input type="text" class="name-input" id="playerName" placeholder="Ваше имя">
             <div class="modal-buttons">
                 <button class="btn" id="saveScoreBtn">Сохранить результат</button>
                 <button class="btn" id="restartFromModalBtn">Начать заново</button>
@@ -81,6 +88,14 @@
             </table>
             <button class="btn close-btn" id="closeLeaderboardBtn">Закрыть</button>
         </div>
+    </div>
+
+    <!-- Мобильные кнопки управления (появляются только на мобильных) -->
+    <div class="mobile-controls" id="mobileControls">
+        <button class="mobile-btn" data-direction="up">▲</button>
+        <button class="mobile-btn" data-direction="left">◀</button>
+        <button class="mobile-btn" data-direction="down">▼</button>
+        <button class="mobile-btn" data-direction="right">▶</button>
     </div>
 
     <script src="js/game.js"></script>
