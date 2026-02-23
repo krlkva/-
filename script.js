@@ -32,7 +32,7 @@ const speedControlWrapper = mainContainer.querySelector('.speed-wrapper');
 const speedControl = speedControlWrapper.querySelector('.speed-control');
 const speedControlSlider = speedControl.querySelector('.speed-control__slider');
 const speedControlInput = speedControlSlider.querySelector('input');
-const speedControlValue = document.getElementById('speed-control'); // Это кнопка x1
+const speedControlValue = document.getElementById('speed-control');
 const leaderboardWrapper = mainContainer.querySelector('.leaderboard-wrapper');
 const leaderboardListElement = leaderboardWrapper.querySelector('.leaderboard__list');
 const victoryWrapper = mainContainer.querySelector('.victory-wrapper');
@@ -234,14 +234,6 @@ async function updateBoardSnap(movedTiles) {
     
     updateBoardVisual();
     updateBoardAdd();
-    
-    setTimeout(() => {
-        if (getFreeTiles().length === 0 && !areMovesAvailable()) {
-            finishGame();
-            return;
-        }
-        resetActiveTiles();
-    }, animationSpeed * 2);
 }
 
 function updateBoardAdd() {
@@ -250,14 +242,28 @@ function updateBoardAdd() {
     
     setTimeout(() => {
         updateBoardVisual();
+        
+        // Проверяем, закончилась ли игра после добавления новой плитки
+        if (!gameIsFinished) {
+            checkGameOver();
+        }
+        
         if (!gameIsFinished) {
             isBoardPaused = false;
         }
     }, animationSpeed);
 }
 
+// Новая функция для проверки окончания игры
+function checkGameOver() {
+    if (getFreeTiles().length === 0 && !areMovesAvailable()) {
+        finishGame();
+        return true;
+    }
+    return false;
+}
+
 function undoMove() {
-    console.log('Undo clicked', prevGameBoard.length);
     if (prevGameBoard.length === 0 || gameIsFinished || isBoardPaused) return;
     
     gameBoard = JSON.parse(JSON.stringify(prevGameBoard));
@@ -389,12 +395,17 @@ function moveBoardRight() {
 }
 
 function areMovesAvailable() {
-    let movesLeft = collectMovedTiles('left');
-    let movesRight = collectMovedTiles('right');
-    let movesUp = collectMovedTiles('up');
-    let movesDown = collectMovedTiles('down');
-    
-    return movesLeft.length !== 0 || movesRight.length !== 0 || movesUp.length !== 0 || movesDown.length !== 0;
+    // Проверяем, есть ли возможные ходы
+    for (let i = 0; i < 4; i++) {
+        for (let j = 0; j < 4; j++) {
+            if (gameBoard[i][j] === 0) continue;
+            
+            // Проверяем соседние клетки
+            if (j < 3 && gameBoard[i][j] === gameBoard[i][j + 1]) return true;
+            if (i < 3 && gameBoard[i][j] === gameBoard[i + 1][j]) return true;
+        }
+    }
+    return false;
 }
 
 function getRandomInteger(max) {
@@ -434,6 +445,9 @@ function getFreeTiles() {
 }
 
 function finishGame() {
+    console.log('Game finished!');
+    
+    // Скрываем все элементы victory screen сначала
     victoryGif.style.display = 'none';
     victoryBest.style.display = 'none';
     victoryRecord.style.display = 'none';
@@ -447,10 +461,12 @@ function finishGame() {
     if (gameScore == null) gameScore = 0;
     victoryScore.textContent = 'You scored ' + gameScore + ' points.';
     
+    // Проверяем, является ли результат рекордным
     if (isNewRecord(gameScore)) {
         victoryForm.style.display = 'flex';
         victorySave.style.display = 'block';
         
+        // Проверяем абсолютный рекорд
         if (leaderboardList.length === 0 || gameScore > [...leaderboardList].sort(compareScore)[0].score) {
             victoryGif.style.display = 'block';
             victoryBest.style.display = 'block';
@@ -463,6 +479,8 @@ function finishGame() {
     victorySubmitName.value = userName;
     victoryWrapper.classList.remove('hidden');
     document.body.classList.add('stop-scrolling');
+    
+    // Очищаем сохранения
     localStorage.removeItem('game-board');
     localStorage.removeItem('game-score');
 }
@@ -472,6 +490,7 @@ function startNewGame() {
     gameIsFinished = false;
     isBoardPaused = false;
     victoryWrapper.classList.add('hidden');
+    document.body.classList.remove('stop-scrolling');
     
     gameBoard = [
         [0, 0, 0, 0],
