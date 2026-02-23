@@ -24,12 +24,14 @@ body {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
+    flex-wrap: wrap;
 }
 
 .title-section h1 {
-    font-size: 48px;
+    font-size: 42px;
     color: #776e65;
     font-weight: bold;
+    line-height: 1.1;
 }
 
 .title-section p {
@@ -48,51 +50,28 @@ body {
     padding: 10px 20px;
     border-radius: 3px;
     text-align: center;
-    min-width: 80px;
+    min-width: 90px;
 }
 
 .score-label {
     color: #eee4da;
     font-size: 13px;
     text-transform: uppercase;
+    font-weight: normal;
 }
 
 .score-value {
     color: white;
-    font-size: 25px;
+    font-size: 28px;
     font-weight: bold;
     line-height: 1.2;
 }
 
-.controls-panel {
-    display: flex;
-    gap: 5px;
-    margin-bottom: 20px;
-}
-
-.btn {
-    background: #8f7a66;
-    color: #f9f6f2;
-    border: none;
-    padding: 10px 0;
-    font-size: 16px;
-    font-weight: bold;
-    border-radius: 3px;
-    cursor: pointer;
-    flex: 1;
-    text-align: center;
-    height: 40px;
-}
-
-.btn:hover {
-    background: #9f8a76;
-}
-
 .board-container {
-    position: relative;
     background: #bbada0;
     border-radius: 6px;
     padding: 15px;
+    margin-bottom: 20px;
     aspect-ratio: 1/1;
 }
 
@@ -106,107 +85,107 @@ body {
 .cell {
     background: #cdc1b4;
     border-radius: 3px;
-    aspect-ratio: 1/1;
-}
-
-.tile-container {
-    position: absolute;
-    top: 15px;
-    left: 15px;
-    right: 15px;
-    bottom: 15px;
-    pointer-events: none;
-}
-
-.tile {
-    position: absolute;
-    background: #eee4da;
-    border-radius: 3px;
     display: flex;
     justify-content: center;
     align-items: center;
     font-size: 45px;
     font-weight: bold;
     color: #776e65;
-    transition: all 0.1s ease;
+    aspect-ratio: 1/1;
 }
 
-.tile-2 { background: #eee4da; color: #776e65; }
-.tile-4 { background: #ede0c8; color: #776e65; }
-.tile-8 { background: #f2b179; color: #f9f6f2; }
-.tile-16 { background: #f59563; color: #f9f6f2; }
-.tile-32 { background: #f67c5f; color: #f9f6f2; }
-.tile-64 { background: #f65e3b; color: #f9f6f2; }
-.tile-128 { background: #edcf72; color: #f9f6f2; font-size: 40px; }
-.tile-256 { background: #edcc61; color: #f9f6f2; font-size: 40px; }
-.tile-512 { background: #edc850; color: #f9f6f2; font-size: 40px; }
-.tile-1024 { background: #edc53f; color: #f9f6f2; font-size: 35px; }
-.tile-2048 { background: #edc22e; color: #f9f6f2; font-size: 35px; }
+/* Цвета для плиток */
+.cell[data-value="2"] { background: #eee4da; }
+.cell[data-value="4"] { background: #ede0c8; }
+.cell[data-value="8"] { background: #f2b179; color: #f9f6f2; }
+.cell[data-value="16"] { background: #f59563; color: #f9f6f2; }
+.cell[data-value="32"] { background: #f67c5f; color: #f9f6f2; }
+.cell[data-value="64"] { background: #f65e3b; color: #f9f6f2; }
+.cell[data-value="128"] { background: #edcf72; color: #f9f6f2; font-size: 40px; }
+.cell[data-value="256"] { background: #edcc61; color: #f9f6f2; font-size: 40px; }
+.cell[data-value="512"] { background: #edc850; color: #f9f6f2; font-size: 40px; }
+.cell[data-value="1024"] { background: #edc53f; color: #f9f6f2; font-size: 35px; }
+.cell[data-value="2048"] { background: #edc22e; color: #f9f6f2; font-size: 35px; }
 
-.tile-new {
-    animation: appear 0.2s;
+.controls-panel {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    align-items: center;
 }
 
-@keyframes appear {
-    0% { opacity: 0; transform: scale(0); }
-    50% { transform: scale(1.1); }
-    100% { opacity: 1; transform: scale(1); }
-}
-
-.tile-merge {
-    animation: merge 0.2s;
-}
-
-@keyframes merge {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.2); background: #edc22e; }
-    100% { transform: scale(1); }
-}
-
-.mobile-controls {
-    display: none;
-    justify-content: center;
-    margin: 20px 0;
-}
-
-.joystick {
-    display: grid;
-    grid-template-columns: 70px 70px 70px;
-    grid-template-rows: 70px 70px;
-    gap: 5px;
-}
-
-.joystick-btn {
+.btn {
     background: #8f7a66;
-    color: white;
+    color: #f9f6f2;
     border: none;
-    font-size: 35px;
+    padding: 12px 0;
+    font-size: 16px;
     font-weight: bold;
     border-radius: 3px;
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 70px;
-    height: 70px;
+    flex: 1;
+    text-align: center;
+    height: 44px;
 }
 
-.joystick-btn:active {
+.btn:hover {
     background: #9f8a76;
 }
 
-.btn-up { grid-column: 2; grid-row: 1; }
-.btn-left { grid-column: 1; grid-row: 2; }
-.btn-down { grid-column: 2; grid-row: 2; }
-.btn-right { grid-column: 3; grid-row: 2; }
+.leaderboard-btn {
+    background: #8f7a66;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+.multiplier {
+    background: #8f7a66;
+    color: #f9f6f2;
+    padding: 12px 0;
+    border-radius: 3px;
+    font-weight: bold;
+    font-size: 16px;
+    min-width: 70px;
+    text-align: center;
+    height: 44px;
+}
 
 .footer {
     text-align: center;
     color: #776e65;
     font-size: 14px;
-    margin-top: 20px;
 }
 
+/* Мобильные кнопки управления (только на мобильных) */
+.mobile-controls {
+    display: none;
+    justify-content: center;
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.mobile-btn {
+    background: #8f7a66;
+    color: white;
+    border: none;
+    font-size: 30px;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 70px;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mobile-btn:active {
+    background: #9f8a76;
+}
+
+/* Модальные окна */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -230,14 +209,14 @@ body {
 }
 
 .modal-content h2 {
-    font-size: 40px;
+    font-size: 36px;
     color: #776e65;
     margin-bottom: 20px;
     font-weight: bold;
 }
 
 .modal-content p {
-    font-size: 18px;
+    font-size: 16px;
     color: #776e65;
     margin-bottom: 20px;
 }
@@ -245,7 +224,7 @@ body {
 .name-input {
     width: 100%;
     padding: 15px;
-    font-size: 18px;
+    font-size: 16px;
     border: 2px solid #bbada0;
     border-radius: 3px;
     margin-bottom: 20px;
@@ -260,13 +239,13 @@ body {
 .modal-buttons {
     display: flex;
     gap: 10px;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 }
 
 .modal-buttons .btn {
     padding: 15px 0;
     height: auto;
-    font-size: 18px;
+    font-size: 16px;
 }
 
 .saved-message {
@@ -305,17 +284,51 @@ body {
     display: none !important;
 }
 
+/* Адаптивность */
 @media (max-width: 520px) {
-    .title-section h1 { font-size: 36px; }
-    .score-card { padding: 8px 15px; }
-    .score-value { font-size: 22px; }
-    .mobile-controls { display: flex; }
-    .tile { font-size: 35px; }
-    .joystick { grid-template-columns: 60px 60px 60px; grid-template-rows: 60px 60px; }
-    .joystick-btn { width: 60px; height: 60px; font-size: 30px; }
+    .title-section h1 {
+        font-size: 32px;
+    }
+    
+    .score-card {
+        padding: 8px 15px;
+        min-width: 70px;
+    }
+    
+    .score-value {
+        font-size: 24px;
+    }
+    
+    .cell {
+        font-size: 35px;
+    }
+    
+    .cell[data-value="128"],
+    .cell[data-value="256"],
+    .cell[data-value="512"] {
+        font-size: 30px;
+    }
+    
+    .cell[data-value="1024"],
+    .cell[data-value="2048"] {
+        font-size: 26px;
+    }
+    
+    .mobile-controls {
+        display: flex;
+    }
 }
 
-@media (max-width: 360px) {
-    .joystick { grid-template-columns: 50px 50px 50px; grid-template-rows: 50px 50px; }
-    .joystick-btn { width: 50px; height: 50px; font-size: 25px; }
+@media (max-width: 400px) {
+    .btn, .multiplier {
+        font-size: 14px;
+        padding: 10px 0;
+        height: 40px;
+    }
+    
+    .mobile-btn {
+        width: 60px;
+        height: 60px;
+        font-size: 26px;
+    }
 }
