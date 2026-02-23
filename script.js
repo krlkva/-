@@ -90,7 +90,6 @@
     
     function getTilePosition(row, col) {
         const boardRect = boardElement.getBoundingClientRect();
-        const containerRect = boardContainer.getBoundingClientRect();
         const cellSize = (boardRect.width - 45) / 4;
         
         return {
