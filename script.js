@@ -119,7 +119,7 @@ function updateBoardMove(direction) {
     updateBoardSnap(movedTiles);
 }
 
-// ===== АНИМАЦИЯ ДВИЖЕНИЯ (ЦИФРЫ ПЕРЕМЕЩАЮТСЯ, ПЛИТКИ ОСТАЮТСЯ) =====
+// ===== АНИМАЦИЯ ДВИЖЕНИЯ =====
 async function animateMovement(moves) {
     if (moves.length === 0) return;
     
@@ -140,18 +140,15 @@ async function animateMovement(moves) {
             
             if (value === 0) continue;
             
-            // Создаём летающую копию цифры
             let flyingTile = document.createElement('div');
             flyingTile.className = 'flying-tile';
             flyingTile.textContent = value;
             flyingTile.setAttribute('data-value', value);
             
-            // Получаем позиции
             let boardRect = board.getBoundingClientRect();
             let fromTileRect = originalTile.getBoundingClientRect();
             let toTileRect = visualTiles[toIndex].getBoundingClientRect();
             
-            // Устанавливаем стили для позиционирования
             flyingTile.style.position = 'fixed';
             flyingTile.style.width = fromTileRect.width + 'px';
             flyingTile.style.height = fromTileRect.height + 'px';
@@ -174,7 +171,6 @@ async function animateMovement(moves) {
             });
         }
         
-        // Запускаем анимацию
         requestAnimationFrame(() => {
             flyingTiles.forEach(tile => {
                 tile.element.style.left = tile.toRect.left + 'px';
@@ -182,7 +178,6 @@ async function animateMovement(moves) {
             });
         });
         
-        // Удаляем временные плитки после анимации
         setTimeout(() => {
             flyingTiles.forEach(tile => tile.element.remove());
             resolve();
@@ -190,12 +185,10 @@ async function animateMovement(moves) {
     });
 }
 
-function animateTile(type, tile, shift = '0%, 0%') {
-    let animation;
-    
+function animateTile(type, tile) {
     switch (type) {
         case 'appeared':
-            animation = tile.animate(
+            tile.animate(
                 [
                     { transform: 'scale(0)', opacity: 0 },
                     { transform: 'scale(1)', opacity: 1 }
@@ -205,7 +198,7 @@ function animateTile(type, tile, shift = '0%, 0%') {
             break;
             
         case 'combined':
-            animation = tile.animate(
+            tile.animate(
                 [
                     { transform: 'scale(1)' },
                     { transform: 'scale(1.2)' },
@@ -215,18 +208,14 @@ function animateTile(type, tile, shift = '0%, 0%') {
             );
             break;
     }
-    
-    return animation;
 }
 
 async function updateBoardSnap(movedTiles) {
     prevGameBoard = JSON.parse(JSON.stringify(gameBoard));
-    prevGameScore = gameScore; // Сохраняем счёт ДО изменений
+    prevGameScore = gameScore;
     
-    // Запускаем анимацию движения цифр
     await animateMovement(movedTiles);
     
-    // Обновляем состояние игры
     for (let tile of movedTiles) {
         let oldTile = gameBoard[tile[0][0]][tile[0][1]];
         let newTile = gameBoard[tile[1][0]][tile[1][1]];
@@ -239,7 +228,6 @@ async function updateBoardSnap(movedTiles) {
             gameBoard[tile[1][0]][tile[1][1]] = oldTile * 2;
             updateScore(oldTile * 2);
             
-            // Анимация слияния
             let visualTile = visualTiles[tile[1][0] * 4 + tile[1][1]];
             animateTile('combined', visualTile);
             visualTile.classList.add('active-tile-combined');
@@ -271,15 +259,17 @@ function updateBoardAdd() {
 }
 
 function undoMove() {
-    if (prevGameBoard.length === 0 || gameIsFinished) return;
+    if (prevGameBoard.length === 0 || gameIsFinished || isBoardPaused) return;
     
     gameBoard = JSON.parse(JSON.stringify(prevGameBoard));
-    gameScore = prevGameScore; // Просто восстанавливаем предыдущий счёт
+    gameScore = prevGameScore;
     updateBoardVisual();
-    elemScore.textContent = gameScore; // Обновляем отображение счёта
+    elemScore.textContent = gameScore;
     updateBestScore();
     prevGameBoard = [];
-    undo.classList.add('disabled');
+    
+    // Активируем кнопки
+    if (speedControlInput) speedControlInput.disabled = false;
 }
 
 function collectMovedTiles(direction) {
@@ -424,7 +414,6 @@ function addNewRandomTile() {
     
     gameBoard[row][col] = tileValue;
     
-    // Анимируем появление
     let tileIndex = row * 4 + col;
     if (tileIndex < visualTiles.length) {
         animateTile('appeared', visualTiles[tileIndex]);
@@ -497,7 +486,6 @@ function startNewGame() {
     
     updateScore(0);
     
-    // Добавляем 2-3 стартовые плитки
     let tilesToAdd = getRandomInteger(2) + 2;
     
     for (let i = 0; i < tilesToAdd; i++) {
@@ -516,6 +504,7 @@ function resetActiveTiles() {
 }
 
 function updateBoardVisual() {
+    // Обновляем состояние кнопки отмены
     if (prevGameBoard.length === 0) {
         undo.classList.add('disabled');
     } else {
@@ -662,7 +651,10 @@ for (let btn of controlsBtns) {
 }
 
 document.addEventListener('keydown', (e) => {
-    if (e.key.startsWith('Arrow') && !gameIsFinished && !isBoardPaused && victoryWrapper.classList.contains('hidden') && leaderboardWrapper.classList.contains('hidden') && speedControlWrapper.classList.contains('hidden')) {
+    if (e.key.startsWith('Arrow') && !gameIsFinished && !isBoardPaused && 
+        victoryWrapper.classList.contains('hidden') && 
+        leaderboardWrapper.classList.contains('hidden') && 
+        speedControlWrapper.classList.contains('hidden')) {
         e.preventDefault();
         updateBoardMove(e.key.slice(5));
     }
