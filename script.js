@@ -32,7 +32,7 @@ const speedControlWrapper = mainContainer.querySelector('.speed-wrapper');
 const speedControl = speedControlWrapper.querySelector('.speed-control');
 const speedControlSlider = speedControl.querySelector('.speed-control__slider');
 const speedControlInput = speedControlSlider.querySelector('input');
-const speedControlValue = document.getElementById('speed-display'); // Это кнопка x1
+const speedControlValue = document.getElementById('speed-control'); // Это кнопка x1
 const leaderboardWrapper = mainContainer.querySelector('.leaderboard-wrapper');
 const leaderboardListElement = leaderboardWrapper.querySelector('.leaderboard__list');
 const victoryWrapper = mainContainer.querySelector('.victory-wrapper');
@@ -46,12 +46,11 @@ const victoryForm = victoryScreen.querySelector('form');
 const victorySaveConfirm = victoryScreen.querySelector('.victory__title-confirm');
 const victorySubmitName = victoryScreen.querySelector('#player-name');
 const victorySubmitBtn = victoryScreen.querySelector('.save-btn');
-const victoryReset = victoryScreen.querySelector('#restart-game'); // Изменено: теперь это кнопка
-const undo = document.getElementById('undo-move'); // Изменено: ищем по ID
-const reset = document.getElementById('new-game'); // Изменено: ищем по ID
-const leaderboardBtn = document.getElementById('show-leaders'); // Изменено: ищем по ID
-const speedControlBtn = document.getElementById('speed-control'); // Изменено: ищем по ID
-const nuke = mainContainer.querySelector('.nuke'); // Этого элемента нет в HTML, нужно добавить или убрать
+const victoryReset = victoryScreen.querySelector('#restart-game');
+const undo = document.getElementById('undo-move');
+const reset = document.getElementById('new-game');
+const leaderboardBtn = document.getElementById('show-leaders');
+const speedControlBtn = document.getElementById('speed-control');
 
 // ===== СОЗДАНИЕ ПОЛЯ =====
 function createGameBoard() {
@@ -145,7 +144,6 @@ async function animateMovement(moves) {
             flyingTile.textContent = value;
             flyingTile.setAttribute('data-value', value);
             
-            let boardRect = board.getBoundingClientRect();
             let fromTileRect = originalTile.getBoundingClientRect();
             let toTileRect = visualTiles[toIndex].getBoundingClientRect();
             
@@ -259,7 +257,7 @@ function updateBoardAdd() {
 }
 
 function undoMove() {
-    console.log('Undo clicked', prevGameBoard.length); // Для отладки
+    console.log('Undo clicked', prevGameBoard.length);
     if (prevGameBoard.length === 0 || gameIsFinished || isBoardPaused) return;
     
     gameBoard = JSON.parse(JSON.stringify(prevGameBoard));
@@ -268,8 +266,8 @@ function undoMove() {
     elemScore.textContent = gameScore;
     updateBestScore();
     prevGameBoard = [];
+    prevGameScore = 0;
     
-    // Активируем кнопки
     if (speedControlInput) speedControlInput.disabled = false;
 }
 
@@ -470,6 +468,7 @@ function finishGame() {
 }
 
 function startNewGame() {
+    console.log('Starting new game');
     gameIsFinished = false;
     isBoardPaused = false;
     victoryWrapper.classList.add('hidden');
@@ -487,9 +486,8 @@ function startNewGame() {
     
     updateScore(0);
     
-    let tilesToAdd = getRandomInteger(2) + 2;
-    
-    for (let i = 0; i < tilesToAdd; i++) {
+    // Добавляем 2 стартовые плитки
+    for (let i = 0; i < 2; i++) {
         addNewRandomTile();
     }
     
@@ -506,12 +504,12 @@ function resetActiveTiles() {
 
 function updateBoardVisual() {
     // Обновляем состояние кнопки отмены
-    if (prevGameBoard.length === 0) {
-        undo.disabled = true;
-        undo.classList.add('disabled');
-    } else {
-        undo.disabled = false;
-        undo.classList.remove('disabled');
+    if (undo) {
+        if (prevGameBoard.length === 0) {
+            undo.disabled = true;
+        } else {
+            undo.disabled = false;
+        }
     }
     
     for (let i = 0; i < 4; i++) {
@@ -651,7 +649,7 @@ if (speedControlInput) {
     speedControlInput.addEventListener('change', (event) => {
         animationSpeed = baseSpeed * (1 / markers[event.target.value]);
         localStorage.setItem('game-speed', animationSpeed);
-        speedControlValue.textContent = 'x' + markers[event.target.value];
+        speedControlBtn.textContent = 'x' + markers[event.target.value];
     });
 }
 
@@ -731,27 +729,6 @@ if (victoryScreen) {
     }
 }
 
-// Если есть кнопка nuke, но её нет в HTML, можно закомментировать или удалить
-// if (nuke) {
-//     nuke.addEventListener('click', () => {
-//         if (confirm('Are you absolutely sure you want to get rid of your saves & start a new game?') === true) {
-//             localStorage.clear();
-//             elemBest.textContent = '0';
-//             prevGameBoard = [];
-//             leaderboardList = [];
-//             gameScore = 0;
-//             prevGameScore = 0;
-//             if (speedControlInput) {
-//                 speedControlInput.value = 3;
-//                 animationSpeed = baseSpeed;
-//                 speedControlValue.textContent = 'x' + markers[3];
-//             }
-//             populateLeaderboard();
-//             startNewGame();
-//         }
-//     });
-// }
-
 // ===== ЗАГРУЗКА СОХРАНЕНИЙ =====
 if (localStorage.getItem('leaderboard')) {
     leaderboardList = JSON.parse(localStorage.getItem('leaderboard'));
@@ -764,7 +741,7 @@ if (localStorage.getItem('game-speed')) {
     let ind = markers.indexOf(Number(speed));
     if (ind >= 0 && speedControlInput) {
         speedControlInput.value = ind;
-        speedControlValue.textContent = 'x' + markers[ind];
+        speedControlBtn.textContent = 'x' + markers[ind];
     }
 }
 
