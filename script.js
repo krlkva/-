@@ -106,7 +106,6 @@ function updateBestScore() {
 function updateBoardMove(direction) {
     if (isBoardPaused || gameIsFinished) return;
     
-    prevGameScore = gameScore;
     isBoardPaused = true;
     if (speedControlInput) speedControlInput.disabled = true;
     
@@ -222,6 +221,7 @@ function animateTile(type, tile, shift = '0%, 0%') {
 
 async function updateBoardSnap(movedTiles) {
     prevGameBoard = JSON.parse(JSON.stringify(gameBoard));
+    prevGameScore = gameScore; // Сохраняем счёт ДО изменений
     
     // Запускаем анимацию движения цифр
     await animateMovement(movedTiles);
@@ -274,8 +274,10 @@ function undoMove() {
     if (prevGameBoard.length === 0 || gameIsFinished) return;
     
     gameBoard = JSON.parse(JSON.stringify(prevGameBoard));
+    gameScore = prevGameScore; // Просто восстанавливаем предыдущий счёт
     updateBoardVisual();
-    updateScore((prevGameScore - gameScore) * 2);
+    elemScore.textContent = gameScore; // Обновляем отображение счёта
+    updateBestScore();
     prevGameBoard = [];
     undo.classList.add('disabled');
 }
