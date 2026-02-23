@@ -16,50 +16,77 @@ let userName = 'user';
 let gameIsFinished = false;
 let isBoardPaused = false;
 let baseSpeed = 100;
-let animationSpeed = 150;
+let animationSpeed = 100;
 
 const markers = [0.25, 0.5, 0.75, 1, 2, 3, 5, 10];
 
 // ===== DOM ЭЛЕМЕНТЫ =====
-const board = document.querySelector('.gameboard');
-const elemScore = document.getElementById('current-score');
-const elemBest = document.getElementById('best-score');
-const undoBtn = document.getElementById('undo-move');
-const newGameBtn = document.getElementById('new-game');
-const leaderboardBtn = document.getElementById('show-leaders');
-const speedBtn = document.getElementById('speed-control');
-const speedDisplay = document.getElementById('speed-display');
-const victoryModal = document.getElementById('victory-modal');
-const leaderboardModal = document.getElementById('leaderboard-modal');
-const speedModal = document.getElementById('speed-modal');
-const victoryScore = document.getElementById('victory-score');
-const recordMessage = document.getElementById('record-message');
-const bestMessage = document.getElementById('best-message');
-const saveMessage = document.getElementById('save-message');
-const victoryGif = document.getElementById('victory-gif');
-const victoryForm = document.getElementById('victory-form');
-const savedConfirm = document.getElementById('saved-confirm');
-const playerName = document.getElementById('player-name');
-const restartGame = document.getElementById('restart-game');
-const leaderboardList = document.getElementById('leaderboard-list');
-const speedSlider = document.getElementById('speed-slider');
-const nukeBtn = document.getElementById('nuke');
-const controlsBtns = document.querySelectorAll('.controls__arrow');
+const mainContainer = document.getElementById('main-container');
+const settings = mainContainer.querySelector('.settings');
+const scores = mainContainer.querySelector('.scores');
+const [elemScore, elemBest] = scores.querySelectorAll('.scores__value');
+const board = mainContainer.querySelector('.gameboard');
+const controls = mainContainer.querySelector('.controls');
+const controlsBtns = controls.querySelectorAll('.controls__arrow');
+const speedControlWrapper = mainContainer.querySelector('.speed-wrapper');
+const speedControl = speedControlWrapper.querySelector('.speed-control');
+const speedControlSlider = speedControl.querySelector('.speed-control__slider');
+const speedControlInput = speedControlSlider.querySelector('input');
+const speedControlValue = document.getElementById('speed-display');
+const leaderboardWrapper = mainContainer.querySelector('.leaderboard-wrapper');
+const leaderboardListElement = leaderboardWrapper.querySelector('.leaderboard__list');
+const victoryWrapper = mainContainer.querySelector('.victory-wrapper');
+const victoryScreen = mainContainer.querySelector('.victory');
+const victoryScore = victoryScreen.querySelector('h3');
+const victoryRecord = victoryScreen.querySelector('.victory__title-record');
+const victoryBest = victoryScreen.querySelector('.victory__title-best');
+const victorySave = victoryScreen.querySelector('.victory__title-save');
+const victoryGif = victoryScreen.querySelector('.victory__gif');
+const victoryForm = victoryScreen.querySelector('form');
+const victorySaveConfirm = victoryScreen.querySelector('.victory__title-confirm');
+const victorySubmitName = victoryScreen.querySelector('#player-name');
+const victorySubmitBtn = victoryScreen.querySelector('.save-btn');
+const victoryReset = victoryScreen.querySelector('.victory__reset input');
+const undo = settings.querySelector('.undo-btn');
+const reset = settings.querySelector('.reset-btn');
+const leaderboardBtn = settings.querySelector('.leaderboard-btn');
+const speedControlBtn = settings.querySelector('.speed-control-btn');
+const nuke = mainContainer.querySelector('.nuke');
 
 // ===== СОЗДАНИЕ ПОЛЯ =====
-function createBoard() {
+function createGameBoard() {
     board.innerHTML = '';
+    
     for (let i = 0; i < 16; i++) {
+        let wrapper = document.createElement('div');
+        wrapper.classList.add('gameboard__tile-wrapper');
+        
         let tile = document.createElement('div');
         tile.classList.add('gameboard__tile');
         tile.setAttribute('data-value', '0');
-        board.appendChild(tile);
+        
+        wrapper.appendChild(tile);
+        board.appendChild(wrapper);
     }
 }
-createBoard();
-const visualTiles = document.querySelectorAll('.gameboard__tile');
+
+createGameBoard();
+const visualTiles = board.querySelectorAll('.gameboard__tile');
 
 // ===== ФУНКЦИИ =====
+function sanitize(string) {
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#x27;',
+        '/': '&#x2F;',
+    };
+    const reg = /[&<>"'/]/ig;
+    return string.replace(reg, (match) => map[match]);
+}
+
 function updateScore(newAmount) {
     gameScore = Math.max(0, gameScore + newAmount);
     elemScore.textContent = gameScore;
@@ -69,432 +96,704 @@ function updateScore(newAmount) {
 
 function updateBestScore() {
     if (leaderboardList.length > 0) {
-        let bestScore = [...leaderboardList].sort((a, b) => b.score - a.score)[0].score;
+        let bestScore = [...leaderboardList].sort(compareScore)[0].score;
         elemBest.textContent = gameScore > bestScore ? gameScore : bestScore;
     } else {
         elemBest.textContent = gameScore;
     }
 }
 
-function getFreeTiles() {
-    let free = [];
-    for (let i = 0; i < 4; i++) {
-        for (let j = 0; j < 4; j++) {
-            if (gameBoard[i][j] === 0) free.push([i, j]);
-        }
-    }
-    return free;
-}
-
-function addNewRandomTile() {
-    let free = getFreeTiles();
-    if (free.length === 0) return false;
-    
-    let [row, col] = free[Math.floor(Math.random() * free.length)];
-    let value = Math.random() < 0.9 ? 2 : 4;
-    gameBoard[row][col] = value;
-    
-    let tile = visualTiles[row * 4 + col];
-    tile.classList.add('tile-appear');
-    setTimeout(() => tile.classList.remove('tile-appear'), animationSpeed);
-    
-    return true;
-}
-
-function moveTileList(tiles) {
-    let moved = [];
-    let filtered = tiles.filter(v => v !== 0);
-    let merged = [];
-    let used = new Array(filtered.length).fill(false);
-    
-    for (let i = 0; i < filtered.length; i++) {
-        if (used[i]) continue;
-        if (i < filtered.length - 1 && filtered[i] === filtered[i + 1] && !used[i + 1]) {
-            merged.push(filtered[i] * 2);
-            used[i] = used[i + 1] = true;
-        } else {
-            merged.push(filtered[i]);
-            used[i] = true;
-        }
-    }
-    
-    while (merged.length < 4) merged.push(0);
-    
-    for (let i = 0; i < 4; i++) {
-        if (tiles[i] !== merged[i]) {
-            moved.push([i, merged[i]]);
-        }
-    }
-    
-    return { merged, moved };
-}
-
-function moveLeft() {
-    let moved = [];
-    let scoreGain = 0;
-    
-    for (let i = 0; i < 4; i++) {
-        let row = gameBoard[i];
-        let { merged, moved: movedCells } = moveTileList(row);
-        
-        for (let m of movedCells) {
-            if (m[1] > row[m[0]]) {
-                scoreGain += m[1];
-            }
-        }
-        
-        gameBoard[i] = merged;
-    }
-    
-    return { moved: moved.length > 0, scoreGain };
-}
-
-function moveRight() {
-    let moved = [];
-    let scoreGain = 0;
-    
-    for (let i = 0; i < 4; i++) {
-        let row = [...gameBoard[i]].reverse();
-        let { merged, moved: movedCells } = moveTileList(row);
-        
-        for (let m of movedCells) {
-            if (m[1] > row[m[0]]) {
-                scoreGain += m[1];
-            }
-        }
-        
-        gameBoard[i] = merged.reverse();
-    }
-    
-    return { moved: moved.length > 0, scoreGain };
-}
-
-function moveUp() {
-    let moved = [];
-    let scoreGain = 0;
-    
-    for (let j = 0; j < 4; j++) {
-        let col = [gameBoard[0][j], gameBoard[1][j], gameBoard[2][j], gameBoard[3][j]];
-        let { merged, moved: movedCells } = moveTileList(col);
-        
-        for (let m of movedCells) {
-            if (m[1] > col[m[0]]) {
-                scoreGain += m[1];
-            }
-        }
-        
-        for (let i = 0; i < 4; i++) {
-            gameBoard[i][j] = merged[i];
-        }
-    }
-    
-    return { moved: moved.length > 0, scoreGain };
-}
-
-function moveDown() {
-    let moved = [];
-    let scoreGain = 0;
-    
-    for (let j = 0; j < 4; j++) {
-        let col = [gameBoard[3][j], gameBoard[2][j], gameBoard[1][j], gameBoard[0][j]];
-        let { merged, moved: movedCells } = moveTileList(col);
-        
-        for (let m of movedCells) {
-            if (m[1] > col[m[0]]) {
-                scoreGain += m[1];
-            }
-        }
-        
-        let result = merged.reverse();
-        for (let i = 0; i < 4; i++) {
-            gameBoard[i][j] = result[i];
-        }
-    }
-    
-    return { moved: moved.length > 0, scoreGain };
-}
-
-function canMove() {
-    for (let i = 0; i < 4; i++) {
-        for (let j = 0; j < 4; j++) {
-            if (gameBoard[i][j] === 0) return true;
-            if (j < 3 && gameBoard[i][j] === gameBoard[i][j + 1]) return true;
-            if (i < 3 && gameBoard[i][j] === gameBoard[i + 1][j]) return true;
-        }
-    }
-    return false;
-}
-
-function updateBoardVisual() {
-    for (let i = 0; i < 4; i++) {
-        for (let j = 0; j < 4; j++) {
-            let tile = visualTiles[i * 4 + j];
-            let value = gameBoard[i][j];
-            tile.setAttribute('data-value', value);
-            tile.textContent = value || '';
-            
-            let size = Math.max(1, tileFont - tileFontRate * value.toString().length);
-            tile.style.fontSize = size + 'rem';
-        }
-    }
-    
-    undoBtn.disabled = prevGameBoard.length === 0;
-    localStorage.setItem('game-board', JSON.stringify(gameBoard));
-}
-
-function makeMove(direction) {
+function updateBoardMove(direction) {
     if (isBoardPaused || gameIsFinished) return;
     
-    prevGameBoard = JSON.parse(JSON.stringify(gameBoard));
     prevGameScore = gameScore;
+    isBoardPaused = true;
+    if (speedControlInput) speedControlInput.disabled = true;
     
-    let result;
-    switch(direction) {
-        case 'left': result = moveLeft(); break;
-        case 'right': result = moveRight(); break;
-        case 'up': result = moveUp(); break;
-        case 'down': result = moveDown(); break;
-        default: return;
-    }
-    
-    if (!result.moved) {
-        prevGameBoard = [];
+    let movedTiles = collectMovedTiles(direction);
+    if (movedTiles.length === 0) {
+        isBoardPaused = false;
+        if (speedControlInput) speedControlInput.disabled = false;
         return;
     }
     
-    gameScore += result.scoreGain;
-    updateBoardVisual();
+    updateBoardSnap(movedTiles);
+}
+
+// ===== АНИМАЦИЯ ДВИЖЕНИЯ (ЦИФРЫ ПЕРЕМЕЩАЮТСЯ, ПЛИТКИ ОСТАЮТСЯ) =====
+async function animateMovement(moves) {
+    if (moves.length === 0) return;
     
-    isBoardPaused = true;
-    
-    setTimeout(() => {
-        addNewRandomTile();
-        updateBoardVisual();
+    return new Promise(resolve => {
+        let flyingTiles = [];
         
-        if (!canMove()) {
-            gameIsFinished = true;
-            finishGame();
+        for (let move of moves) {
+            let fromRow = move[0][0];
+            let fromCol = move[0][1];
+            let toRow = move[1][0];
+            let toCol = move[1][1];
+            
+            let fromIndex = fromRow * 4 + fromCol;
+            let toIndex = toRow * 4 + toCol;
+            
+            let originalTile = visualTiles[fromIndex];
+            let value = gameBoard[fromRow][fromCol];
+            
+            if (value === 0) continue;
+            
+            // Создаём летающую копию цифры
+            let flyingTile = document.createElement('div');
+            flyingTile.className = 'flying-tile';
+            flyingTile.textContent = value;
+            flyingTile.setAttribute('data-value', value);
+            
+            // Получаем позиции
+            let boardRect = board.getBoundingClientRect();
+            let fromTileRect = originalTile.getBoundingClientRect();
+            let toTileRect = visualTiles[toIndex].getBoundingClientRect();
+            
+            // Устанавливаем стили для позиционирования
+            flyingTile.style.position = 'fixed';
+            flyingTile.style.width = fromTileRect.width + 'px';
+            flyingTile.style.height = fromTileRect.height + 'px';
+            flyingTile.style.left = fromTileRect.left + 'px';
+            flyingTile.style.top = fromTileRect.top + 'px';
+            flyingTile.style.zIndex = '1000';
+            flyingTile.style.transition = `all ${animationSpeed}ms ease-in-out`;
+            flyingTile.style.pointerEvents = 'none';
+            flyingTile.style.display = 'flex';
+            flyingTile.style.alignItems = 'center';
+            flyingTile.style.justifyContent = 'center';
+            flyingTile.style.fontSize = window.getComputedStyle(originalTile).fontSize;
+            flyingTile.style.fontWeight = 'bold';
+            
+            document.body.appendChild(flyingTile);
+            
+            flyingTiles.push({
+                element: flyingTile,
+                toRect: toTileRect
+            });
         }
         
-        isBoardPaused = false;
+        // Запускаем анимацию
+        requestAnimationFrame(() => {
+            flyingTiles.forEach(tile => {
+                tile.element.style.left = tile.toRect.left + 'px';
+                tile.element.style.top = tile.toRect.top + 'px';
+            });
+        });
+        
+        // Удаляем временные плитки после анимации
+        setTimeout(() => {
+            flyingTiles.forEach(tile => tile.element.remove());
+            resolve();
+        }, animationSpeed);
+    });
+}
+
+function animateTile(type, tile, shift = '0%, 0%') {
+    let animation;
+    
+    switch (type) {
+        case 'appeared':
+            animation = tile.animate(
+                [
+                    { transform: 'scale(0)', opacity: 0 },
+                    { transform: 'scale(1)', opacity: 1 }
+                ],
+                { duration: animationSpeed, iterations: 1 }
+            );
+            break;
+            
+        case 'combined':
+            animation = tile.animate(
+                [
+                    { transform: 'scale(1)' },
+                    { transform: 'scale(1.2)' },
+                    { transform: 'scale(1)' }
+                ],
+                { duration: animationSpeed, iterations: 1 }
+            );
+            break;
+    }
+    
+    return animation;
+}
+
+async function updateBoardSnap(movedTiles) {
+    prevGameBoard = JSON.parse(JSON.stringify(gameBoard));
+    
+    // Запускаем анимацию движения цифр
+    await animateMovement(movedTiles);
+    
+    // Обновляем состояние игры
+    for (let tile of movedTiles) {
+        let oldTile = gameBoard[tile[0][0]][tile[0][1]];
+        let newTile = gameBoard[tile[1][0]][tile[1][1]];
+        
+        if (oldTile != newTile) {
+            gameBoard[tile[0][0]][tile[0][1]] = 0;
+            gameBoard[tile[1][0]][tile[1][1]] = oldTile;
+        } else {
+            gameBoard[tile[0][0]][tile[0][1]] = 0;
+            gameBoard[tile[1][0]][tile[1][1]] = oldTile * 2;
+            updateScore(oldTile * 2);
+            
+            // Анимация слияния
+            let visualTile = visualTiles[tile[1][0] * 4 + tile[1][1]];
+            animateTile('combined', visualTile);
+            visualTile.classList.add('active-tile-combined');
+        }
+    }
+    
+    updateBoardVisual();
+    updateBoardAdd();
+    
+    setTimeout(() => {
+        if (getFreeTiles().length === 0 && !areMovesAvailable()) {
+            finishGame();
+            return;
+        }
+        resetActiveTiles();
+    }, animationSpeed * 2);
+}
+
+function updateBoardAdd() {
+    addNewRandomTile();
+    if (speedControlInput) speedControlInput.disabled = false;
+    
+    setTimeout(() => {
+        updateBoardVisual();
+        if (!gameIsFinished) {
+            isBoardPaused = false;
+        }
     }, animationSpeed);
 }
 
 function undoMove() {
-    if (prevGameBoard.length === 0 || gameIsFinished || isBoardPaused) return;
+    if (prevGameBoard.length === 0 || gameIsFinished) return;
     
     gameBoard = JSON.parse(JSON.stringify(prevGameBoard));
-    gameScore = prevGameScore;
     updateBoardVisual();
-    
+    updateScore((prevGameScore - gameScore) * 2);
     prevGameBoard = [];
-    prevGameScore = 0;
-    undoBtn.disabled = true;
+    undo.classList.add('disabled');
 }
 
-function finishGame() {
-    victoryScore.textContent = `You scored ${gameScore} points.`;
-    
-    let isRecord = false;
-    if (leaderboardList.length < 10) isRecord = true;
-    else {
-        let sorted = [...leaderboardList].sort((a, b) => b.score - a.score);
-        if (gameScore > sorted[sorted.length - 1].score) isRecord = true;
+function collectMovedTiles(direction) {
+    direction = direction.toLowerCase();
+    switch (direction) {
+        case 'up': return moveBoardUp();
+        case 'down': return moveBoardDown();
+        case 'left': return moveBoardLeft();
+        case 'right': return moveBoardRight();
+        default: return [];
     }
+}
+
+function moveTileList(tiles) {
+    let movedTiles = [];
+    let gameBoardWidth = document.querySelector('.gameboard').offsetWidth;
+    let tileWidth = document.querySelector('.gameboard__tile').offsetWidth;
+    let ratio = (gameBoardWidth / tileWidth - 4) / 10;
     
-    recordMessage.style.display = 'none';
-    bestMessage.style.display = 'none';
-    saveMessage.style.display = 'none';
-    victoryGif.style.display = 'none';
-    victoryForm.style.display = 'none';
-    savedConfirm.style.display = 'none';
-    
-    if (isRecord) {
-        saveMessage.style.display = 'block';
-        victoryForm.style.display = 'flex';
-        
-        let best = leaderboardList.length === 0 || gameScore > [...leaderboardList].sort((a, b) => b.score - a.score)[0]?.score;
-        if (best) {
-            bestMessage.style.display = 'block';
-            victoryGif.style.display = 'block';
-        } else {
-            recordMessage.style.display = 'block';
+    for (let k = 0; k < 4; k++) {
+        if (tiles[k] === 0) {
+            for (let l = k + 1; l < 4; l++) {
+                if (tiles[l] !== 0) {
+                    tiles[k] = tiles[l];
+                    tiles[l] = 0;
+                    movedTiles.push([l, k, (l - k + (ratio * 2 * (l - k)))]);
+                    break;
+                }
+            }
+        }
+
+        if (tiles[k] !== 0) {
+            for (let l = k + 1; l < 4; l++) {
+                if (tiles[l] === 0) continue;
+                if (tiles[l] === tiles[k]) {
+                    tiles[k] = tiles[l] * 2;
+                    tiles[l] = 0;
+                    movedTiles.push([l, k, (l - k + (ratio * 2 * (l - k)))]);
+                }
+                break;
+            }
         }
     }
     
-    playerName.value = userName;
-    victoryModal.classList.add('active');
+    return movedTiles;
+}
+
+function moveBoardUp() {
+    let movedTiles = [];
+    for (let j = 0; j < 4; j++) {
+        let column = [];
+        for (let k = 0; k < 4; k++) column.push(gameBoard[k][j]);
+        let movedColumnTiles = moveTileList(column);
+        
+        for (let k = 0; k < movedColumnTiles.length; k++) {
+            movedTiles.push([
+                [movedColumnTiles[k][0], j],
+                [movedColumnTiles[k][1], j],
+                '0%, ' + (-movedColumnTiles[k][2]) * 100 + '%'
+            ]);
+        }
+    }
+    return movedTiles;
+}
+
+function moveBoardDown() {
+    let movedTiles = [];
+    for (let j = 0; j < 4; j++) {
+        let column = [];
+        for (let k = 3; k >= 0; k--) column.push(gameBoard[k][j]);
+        let movedColumnTiles = moveTileList(column);
+        
+        for (let k = 0; k < movedColumnTiles.length; k++) {
+            movedTiles.push([
+                [3 - movedColumnTiles[k][0], j],
+                [3 - movedColumnTiles[k][1], j],
+                '0%, ' + (movedColumnTiles[k][2]) * 100 + '%'
+            ]);
+        }
+    }
+    return movedTiles;
+}
+
+function moveBoardLeft() {
+    let movedTiles = [];
+    for (let i = 0; i < 4; i++) {
+        let row = [];
+        for (let k = 0; k < 4; k++) row.push(gameBoard[i][k]);
+        let movedRowTiles = moveTileList(row);
+        
+        for (let k = 0; k < movedRowTiles.length; k++) {
+            movedTiles.push([
+                [i, movedRowTiles[k][0]],
+                [i, movedRowTiles[k][1]],
+                (-movedRowTiles[k][2]) * 100 + '%, 0%'
+            ]);
+        }
+    }
+    return movedTiles;
+}
+
+function moveBoardRight() {
+    let movedTiles = [];
+    for (let i = 0; i < 4; i++) {
+        let row = [];
+        for (let k = 3; k >= 0; k--) row.push(gameBoard[i][k]);
+        let movedRowTiles = moveTileList(row);
+        
+        for (let k = 0; k < movedRowTiles.length; k++) {
+            movedTiles.push([
+                [i, 3 - movedRowTiles[k][0]],
+                [i, 3 - movedRowTiles[k][1]],
+                (movedRowTiles[k][2]) * 100 + '%, 0%'
+            ]);
+        }
+    }
+    return movedTiles;
+}
+
+function areMovesAvailable() {
+    let movesLeft = collectMovedTiles('left');
+    let movesRight = collectMovedTiles('right');
+    let movesUp = collectMovedTiles('up');
+    let movesDown = collectMovedTiles('down');
+    
+    return movesLeft.length !== 0 || movesRight.length !== 0 || movesUp.length !== 0 || movesDown.length !== 0;
+}
+
+function getRandomInteger(max) {
+    return Math.floor(Math.random() * max);
+}
+
+function addNewRandomTile() {
+    let freeTiles = getFreeTiles();
+    if (freeTiles.length === 0) {
+        return false;
+    }
+    
+    let randomIndex = getRandomInteger(freeTiles.length);
+    let [row, col] = freeTiles[randomIndex];
+    let tileValue = Math.random() < 0.9 ? 2 : 4;
+    
+    gameBoard[row][col] = tileValue;
+    
+    // Анимируем появление
+    let tileIndex = row * 4 + col;
+    if (tileIndex < visualTiles.length) {
+        animateTile('appeared', visualTiles[tileIndex]);
+    }
+    
+    return true;
+}
+
+function getFreeTiles() {
+    let freeTiles = [];
+    for (let i = 0; i < 4; i++) {
+        for (let j = 0; j < 4; j++) {
+            if (gameBoard[i][j] === 0) {
+                freeTiles.push([i, j]);
+            }
+        }
+    }
+    return freeTiles;
+}
+
+function finishGame() {
+    victoryGif.style.display = 'none';
+    victoryBest.style.display = 'none';
+    victoryRecord.style.display = 'none';
+    victorySave.style.display = 'none';
+    victorySaveConfirm.style.display = 'none';
+    victoryForm.style.display = 'none';
+    
+    isBoardPaused = true;
+    gameIsFinished = true;
+    
+    if (gameScore == null) gameScore = 0;
+    victoryScore.textContent = 'You scored ' + gameScore + ' points.';
+    
+    if (isNewRecord(gameScore)) {
+        victoryForm.style.display = 'flex';
+        victorySave.style.display = 'block';
+        
+        if (leaderboardList.length === 0 || gameScore > [...leaderboardList].sort(compareScore)[0].score) {
+            victoryGif.style.display = 'block';
+            victoryBest.style.display = 'block';
+            victoryBest.textContent = 'Absolute record!';
+        } else {
+            victoryRecord.style.display = 'block';
+        }
+    }
+    
+    victorySubmitName.value = userName;
+    victoryWrapper.classList.remove('hidden');
     document.body.classList.add('stop-scrolling');
+    localStorage.removeItem('game-board');
+    localStorage.removeItem('game-score');
 }
 
 function startNewGame() {
+    gameIsFinished = false;
+    isBoardPaused = false;
+    victoryWrapper.classList.add('hidden');
+    
     gameBoard = [
         [0, 0, 0, 0],
         [0, 0, 0, 0],
         [0, 0, 0, 0],
         [0, 0, 0, 0]
     ];
-    gameScore = 0;
+    
     prevGameBoard = [];
     prevGameScore = 0;
-    gameIsFinished = false;
-    isBoardPaused = false;
+    gameScore = 0;
     
-    updateBoardVisual();
     updateScore(0);
     
-    for (let i = 0; i < 3; i++) {
+    // Добавляем 2-3 стартовые плитки
+    let tilesToAdd = getRandomInteger(2) + 2;
+    
+    for (let i = 0; i < tilesToAdd; i++) {
         addNewRandomTile();
     }
     
-    victoryModal.classList.remove('active');
-    document.body.classList.remove('stop-scrolling');
-    undoBtn.disabled = true;
+    updateBoardVisual();
 }
 
-// ===== ЛИДЕРБОРД =====
-function loadLeaderboard() {
-    let saved = localStorage.getItem('leaderboard');
-    if (saved) leaderboardList = JSON.parse(saved);
+function resetActiveTiles() {
+    for (let i = 0; i < 4; i++) {
+        for (let j = 0; j < 4; j++) {
+            visualTiles[i * 4 + j].classList.remove('active-tile-combined');
+        }
+    }
 }
 
-function saveLeaderboard() {
-    localStorage.setItem('leaderboard', JSON.stringify(leaderboardList));
+function updateBoardVisual() {
+    if (prevGameBoard.length === 0) {
+        undo.classList.add('disabled');
+    } else {
+        undo.classList.remove('disabled');
+    }
+    
+    for (let i = 0; i < 4; i++) {
+        for (let j = 0; j < 4; j++) {
+            let index = i * 4 + j;
+            if (index >= visualTiles.length) continue;
+            
+            let tile = visualTiles[index];
+            let value = gameBoard[i][j];
+            
+            tile.setAttribute('data-value', value);
+            
+            if (value !== 0) {
+                tile.textContent = value;
+                tile.classList.add('active-tile');
+            } else {
+                tile.textContent = '';
+                tile.classList.remove('active-tile');
+            }
+            
+            let tileVisual = Math.max(1, tileFont - tileFontRate * value.toString().length);
+            tile.style.fontSize = tileVisual + 'rem';
+        }
+    }
+    
+    if (!gameIsFinished) {
+        localStorage.setItem('game-board', JSON.stringify(gameBoard));
+    }
 }
 
-function addToLeaderboard(name, score) {
+function compareScore(a, b) {
+    return b.score - a.score;
+}
+
+function isNewRecord(newScore) {
+    if (leaderboardList.length < 10) return true;
+    leaderboardList.sort(compareScore);
+    return leaderboardList[leaderboardList.length - 1].score < newScore;
+}
+
+function addToLeaderboard(newName, newScore, newDate) {
+    if (!isNewRecord(newScore)) return;
+    
+    if (leaderboardList.length >= 10) {
+        leaderboardList.sort(compareScore);
+        leaderboardList.pop();
+    }
+    
     leaderboardList.push({
-        name: name || 'user',
-        score: score,
-        date: new Date().toLocaleDateString('ru-RU')
+        name: sanitize(newName) || 'user',
+        date: newDate,
+        score: newScore
     });
-    leaderboardList.sort((a, b) => b.score - a.score);
-    if (leaderboardList.length > 10) leaderboardList.pop();
-    saveLeaderboard();
-    renderLeaderboard();
+    
+    localStorage.setItem('leaderboard', JSON.stringify(leaderboardList));
+    populateLeaderboard();
 }
 
-function renderLeaderboard() {
-    leaderboardList.innerHTML = '';
-    leaderboardList.sort((a, b) => b.score - a.score);
+function populateLeaderboard() {
+    if (!leaderboardListElement) return;
+    
+    leaderboardListElement.innerHTML = '';
+    leaderboardList.sort(compareScore);
     
     for (let entry of leaderboardList) {
         let li = document.createElement('li');
-        li.innerHTML = `${entry.name} - ${entry.score} (${entry.date})`;
-        leaderboardList.appendChild(li);
+        li.innerHTML = `<span>${entry.name}</span> <span>${entry.score}</span> <span>${entry.date}</span>`;
+        leaderboardListElement.appendChild(li);
     }
     
     for (let i = leaderboardList.length; i < 10; i++) {
         let li = document.createElement('li');
-        li.innerHTML = '... - 0 (----)';
-        leaderboardList.appendChild(li);
+        li.innerHTML = `<span>...</span> <span>0</span> <span>YYYY-MM-DD</span>`;
+        leaderboardListElement.appendChild(li);
     }
 }
 
-// ===== СОБЫТИЯ =====
-document.addEventListener('keydown', (e) => {
-    if (e.key.startsWith('Arrow')) {
-        e.preventDefault();
-        let dir = e.key.slice(5).toLowerCase();
-        makeMove(dir);
+function disableAllButtons(exception) {
+    let buttons = document.querySelectorAll('button');
+    let exceptions = exception.querySelectorAll('button');
+    
+    for (let btn of buttons) {
+        if (![...exceptions].includes(btn)) {
+            btn.tabIndex = '-1';
+        }
+    }
+}
+
+function enableAllButtons() {
+    let buttons = document.querySelectorAll('button');
+    for (let btn of buttons) btn.tabIndex = '0';
+}
+
+function openLeaderboard() {
+    disableAllButtons(leaderboardWrapper);
+    leaderboardWrapper.classList.remove('hidden');
+    document.body.classList.add('stop-scrolling');
+}
+
+function closeLeaderboard() {
+    enableAllButtons();
+    leaderboardWrapper.classList.add('hidden');
+    document.body.classList.remove('stop-scrolling');
+}
+
+function closeSpeedControl(e) {
+    isBoardPaused = false;
+    enableAllButtons();
+    
+    if (!e.target.classList.contains('popup')) return;
+    
+    if (!speedControlWrapper.classList.contains('hidden')) {
+        speedControlWrapper.classList.add('hidden');
+        document.body.classList.remove('stop-scrolling');
+    }
+}
+
+// ===== ОБРАБОТЧИКИ СОБЫТИЙ =====
+undo.addEventListener('click', undoMove);
+
+reset.addEventListener('click', () => {
+    if (confirm('Are you absolutely sure you want to start a new game?') === true) {
+        startNewGame();
     }
 });
 
-controlsBtns.forEach(btn => {
-    btn.addEventListener('click', () => makeMove(btn.dataset.direction));
+speedControlBtn.addEventListener('click', () => {
+    if (speedControlWrapper.classList.contains('hidden')) {
+        isBoardPaused = true;
+        disableAllButtons(speedControlWrapper);
+        speedControlWrapper.classList.remove('hidden');
+        document.body.classList.add('stop-scrolling');
+    }
 });
 
-newGameBtn.addEventListener('click', () => {
-    if (confirm('Начать новую игру?')) startNewGame();
+speedControlInput.addEventListener('change', (event) => {
+    animationSpeed = baseSpeed * (1 / markers[event.target.value]);
+    localStorage.setItem('game-speed', animationSpeed);
+    speedControlValue.textContent = 'x' + markers[event.target.value];
 });
 
-undoBtn.addEventListener('click', undoMove);
+leaderboardBtn.addEventListener('click', openLeaderboard);
 
-leaderboardBtn.addEventListener('click', () => {
-    renderLeaderboard();
-    leaderboardModal.classList.add('active');
-    document.body.classList.add('stop-scrolling');
-});
+for (let btn of controlsBtns) {
+    btn.addEventListener('click', () => updateBoardMove(btn.dataset.direction));
+}
 
-speedBtn.addEventListener('click', () => {
-    speedModal.classList.add('active');
-    document.body.classList.add('stop-scrolling');
-    isBoardPaused = true;
-});
-
-speedSlider.addEventListener('input', (e) => {
-    let val = e.target.value;
-    animationSpeed = baseSpeed * (1 / markers[val]);
-    speedDisplay.textContent = 'x' + markers[val];
-});
-
-victoryForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    addToLeaderboard(playerName.value, gameScore);
-    victoryForm.style.display = 'none';
-    saveMessage.style.display = 'none';
-    recordMessage.style.display = 'none';
-    bestMessage.style.display = 'none';
-    victoryGif.style.display = 'none';
-    savedConfirm.style.display = 'block';
-});
-
-restartGame.addEventListener('click', () => {
-    victoryModal.classList.remove('active');
-    document.body.classList.remove('stop-scrolling');
-    startNewGame();
+document.addEventListener('keydown', (e) => {
+    if (e.key.startsWith('Arrow') && !gameIsFinished && !isBoardPaused && victoryWrapper.classList.contains('hidden') && leaderboardWrapper.classList.contains('hidden')) {
+        e.preventDefault();
+        updateBoardMove(e.key.slice(5));
+    }
 });
 
 // Закрытие модалок
-document.querySelectorAll('.modal-close').forEach(btn => {
-    btn.addEventListener('click', () => {
-        victoryModal.classList.remove('active');
-        leaderboardModal.classList.remove('active');
-        speedModal.classList.remove('active');
-        document.body.classList.remove('stop-scrolling');
-        isBoardPaused = false;
+if (speedControlWrapper) {
+    let closeBtn = speedControlWrapper.querySelector('.close-btn');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            closeSpeedControl(speedControlWrapper);
+        });
+    }
+    
+    speedControlWrapper.addEventListener('click', (e) => {
+        closeSpeedControl(e);
     });
-});
+}
 
-document.querySelectorAll('.modal-overlay').forEach(overlay => {
-    overlay.addEventListener('click', (e) => {
-        if (e.target === overlay) {
-            overlay.classList.remove('active');
+if (leaderboardWrapper) {
+    leaderboardWrapper.addEventListener('click', (e) => {
+        if (e.target.classList.contains('popup')) closeLeaderboard();
+    });
+    
+    let closeBtn = leaderboardWrapper.querySelector('.close-btn');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', closeLeaderboard);
+    }
+}
+
+if (victoryForm) {
+    victoryForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        addToLeaderboard(victorySubmitName.value, gameScore, new Date().toISOString().slice(0, 10));
+        victoryForm.style.display = 'none';
+        victorySave.style.display = 'none';
+        victoryRecord.style.display = 'none';
+        victoryGif.style.display = 'none';
+        victoryBest.style.display = 'none';
+        victorySaveConfirm.style.display = 'block';
+        userName = sanitize(victorySubmitName.value);
+        localStorage.setItem('user-name', userName);
+    });
+}
+
+if (victoryReset) {
+    victoryReset.addEventListener('change', () => {
+        victoryWrapper.classList.add('hidden');
+        startNewGame();
+    });
+}
+
+if (victoryScreen) {
+    let closeBtn = victoryScreen.querySelector('.close-btn');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            victoryWrapper.classList.add('hidden');
             document.body.classList.remove('stop-scrolling');
-            isBoardPaused = false;
+            enableAllButtons();
+        });
+    }
+}
+
+if (nuke) {
+    nuke.addEventListener('click', () => {
+        if (confirm('Are you absolutely sure you want to get rid of your saves & start a new game?') === true) {
+            localStorage.clear();
+            elemBest.textContent = '0';
+            prevGameBoard = [];
+            leaderboardList = [];
+            gameScore = 0;
+            prevGameScore = 0;
+            if (speedControlInput) {
+                speedControlInput.value = 3;
+                animationSpeed = baseSpeed;
+                speedControlValue.textContent = 'x' + markers[3];
+            }
+            populateLeaderboard();
+            startNewGame();
         }
     });
-});
+}
 
-nukeBtn.addEventListener('click', () => {
-    if (confirm('Удалить все сохранения?')) {
-        localStorage.clear();
-        leaderboardList = [];
-        startNewGame();
-        renderLeaderboard();
-    }
-});
-
-// ===== ЗАГРУЗКА =====
-loadLeaderboard();
-
-if (localStorage.getItem('game-board')) {
-    gameBoard = JSON.parse(localStorage.getItem('game-board'));
-    gameScore = JSON.parse(localStorage.getItem('game-score')) || 0;
-    updateBoardVisual();
-    elemScore.textContent = gameScore;
-} else {
-    startNewGame();
+// ===== ЗАГРУЗКА СОХРАНЕНИЙ =====
+if (localStorage.getItem('leaderboard')) {
+    leaderboardList = JSON.parse(localStorage.getItem('leaderboard'));
+    updateBestScore();
 }
 
 if (localStorage.getItem('game-speed')) {
     animationSpeed = JSON.parse(localStorage.getItem('game-speed'));
-    let speed = baseSpeed / animationSpeed;
-    let ind = markers.indexOf(Number(speed.toFixed(2)));
-    if (ind >= 0) {
-        speedSlider.value = ind;
-        speedDisplay.textContent = 'x' + markers[ind];
+    let speed = Math.round(baseSpeed * 100 / animationSpeed) / 100;
+    let ind = markers.indexOf(Number(speed));
+    if (ind >= 0 && speedControlInput) {
+        speedControlInput.value = ind;
+        speedControlValue.textContent = 'x' + markers[ind];
     }
 }
 
-renderLeaderboard();
+if (localStorage.getItem('user-name')) {
+    userName = localStorage.getItem('user-name');
+}
+
+populateLeaderboard();
+
+// Адаптация шрифта
+let x = window.matchMedia('(max-width: 512px)');
+x.addEventListener('change', () => {
+    if (x.matches) {
+        tileFont = 2;
+        tileFontRate = 0.25;
+    } else {
+        tileFont = 2.25;
+        tileFontRate = 0.125;
+    }
+    updateBoardVisual();
+});
+
+if (x.matches) {
+    tileFont = 2;
+    tileFontRate = 0.25;
+} else {
+    tileFont = 2.25;
+    tileFontRate = 0.125;
+}
+
+// ===== ЗАПУСК ИГРЫ =====
+setTimeout(() => {
+    startNewGame();
+}, 100);
